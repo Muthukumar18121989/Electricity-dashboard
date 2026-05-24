@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Electricity Monitor</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #4f8ef7;
+      --accent2: #34d399;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header h1 .icon { font-size: 1.5rem; }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .status-pill .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 6px var(--accent2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .grid-top {
+      grid-template-columns: 300px 1fr 1fr;
+    }
+
+    .grid-bottom {
+      grid-template-columns: 1fr 1fr;
+      margin-top: 0;
+    }
+
+    @media (max-width: 900px) {
+      .grid-top { grid-template-columns: 1fr; }
+      .grid-bottom { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Live Meter ────────────────────────────────── */
+    .meter-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gauge-wrap {
+      position: relative;
+      width: 220px;
+      height: 120px;
+      overflow: hidden;
+    }
+
+    .gauge-svg { width: 220px; height: 220px; }
+
+    .gauge-track {
+      fill: none;
+      stroke: var(--surface2);
+      stroke-width: 18;
+      stroke-linecap: round;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke: url(#gaugeGrad);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-dasharray: 345;
+      stroke-dashoffset: 345;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .gauge-center {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .gauge-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .gauge-unit {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .gauge-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 220px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: -8px;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(79, 142, 247, 0.12);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .live-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .meter-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .mini-stat {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .mini-stat .val {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .mini-stat .lbl {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .color-green { color: var(--accent2); }
+    .color-yellow { color: var(--warn); }
+    .color-blue { color: var(--accent); }
+    .color-red { color: var(--danger); }
+
+    /* ── Stat Cards ────────────────────────────────── */
+    .stat-big {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .stat-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 8px;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .trend.up { background: rgba(239,68,68,0.12); color: var(--danger); }
+    .trend.down { background: rgba(52,211,153,0.12); color: var(--accent2); }
+
+    /* ── Chart Cards ───────────────────────────────── */
+    .chart-container { position: relative; height: 220px; }
+
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Cost Card ─────────────────────────────────── */
+    .cost-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .cost-item {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .cost-item .label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .cost-item .amount {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .rate-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .rate-row label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .rate-row input {
+      width: 80px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      outline: none;
+    }
+
+    .rate-row input:focus {
+      border-color: var(--accent);
+    }
+
+    .projected-bar {
+      margin-top: 14px;
+    }
+
+    .projected-bar .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .bar-track {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 0.72rem;
+      color: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span class="icon">⚡</span> Home Electricity Monitor</h1>
+  <div class="status-pill"><span class="dot"></span> Live · Updated just now</div>
+</header>
+
+<div class="grid grid-top">
+
+  <!-- Live Meter -->
+  <div class="card meter-card">
+    <div class="card-title">Live Power Draw</div>
+    <div class="live-badge"><span class="dot"></span> REAL-TIME</div>
+
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 220 220">
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#4f8ef7"/>
+            <stop offset="100%" stop-color="#34d399"/>
+          </linearGradient>
+        </defs>
+        <!-- half-circle: starts at 180° goes to 0° (bottom half of 220px circle) -->
+        <path class="gauge-track"
+          d="M 28 180 A 82 82 0 0 1 192 180"
+          stroke-dasharray="345" stroke-dashoffset="0"
+        />
+        <path class="gauge-fill" id="gaugeFill"
+          d="M 28 180 A 82 82 0 0 1 192 180"
+        />
+      </svg>
+      <div class="gauge-center">
+        <div class="gauge-value color-blue" id="gaugeVal">0.0</div>
+        <div class="gauge-unit">kW</div>
+      </div>
+    </div>
+
+    <div class="gauge-labels">
+      <span>0</span><span>2.5</span><span>5 kW</span>
+    </div>
+
+    <div class="meter-stats">
+      <div class="mini-stat">
+        <div class="val color-green" id="todayKwh">—</div>
+        <div class="lbl">Today (kWh)</div>
+      </div>
+      <div class="mini-stat">
+        <div class="val color-yellow" id="peakKw">—</div>
+        <div class="lbl">Today Peak (kW)</div>
+      </div>
+      <div class="mini-stat">
+        <div class="val color-blue" id="avgKw">—</div>
+        <div class="lbl">Avg kW (7d)</div>
+      </div>
+      <div class="mini-stat">
+        <div class="val" id="co2">—</div>
+        <div class="lbl">CO₂ Today (kg)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Usage Stat -->
+  <div class="card">
+    <div class="card-title">This Month Usage</div>
+    <div class="stat-big color-blue" id="monthKwh">—</div>
+    <div class="stat-sub">kilowatt-hours consumed</div>
+    <div class="trend up" id="monthTrend">↑ — vs last month</div>
+
+    <div style="margin-top:24px">
+      <div class="card-title" style="margin-bottom:12px">Daily Avg vs Baseline</div>
+      <div class="chart-container" style="height:140px">
+        <canvas id="sparkChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Stat -->
+  <div class="card">
+    <div class="card-title">Billing Estimate</div>
+    <div class="stat-big color-accent2" id="billEst" style="color:var(--accent2)">—</div>
+    <div class="stat-sub">projected this month</div>
+    <div class="trend down" id="billTrend">↓ — vs last month</div>
+
+    <div style="margin-top:24px">
+      <div class="card-title" style="margin-bottom:12px">Cost Breakdown (Today)</div>
+      <div class="chart-container" style="height:140px">
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-bottom" style="margin-top:20px">
+
+  <!-- Usage History Chart -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+      <div class="card-title" style="margin:0">Usage History</div>
+      <div class="tab-bar" style="margin:0">
+        <button class="tab active" data-range="7d" onclick="switchRange(this,'7d')">7D</button>
+        <button class="tab" data-range="30d" onclick="switchRange(this,'30d')">30D</button>
+        <button class="tab" data-range="12m" onclick="switchRange(this,'12m')">12M</button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="historyChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Cost Tracker -->
+  <div class="card">
+    <div class="card-title">Cost Tracker</div>
+
+    <div class="cost-grid">
+      <div class="cost-item">
+        <div class="label">Today so far</div>
+        <div class="amount color-blue" id="costToday">—</div>
+      </div>
+      <div class="cost-item">
+        <div class="label">This week</div>
+        <div class="amount color-yellow" id="costWeek">—</div>
+      </div>
+      <div class="cost-item">
+        <div class="label">This month</div>
+        <div class="amount" id="costMonth">—</div>
+      </div>
+      <div class="cost-item">
+        <div class="label">Last month</div>
+        <div class="amount color-green" id="costLastMonth">—</div>
+      </div>
+    </div>
+
+    <div class="rate-row">
+      <label>Rate ($/kWh)</label>
+      <input type="number" id="rateInput" value="0.13" step="0.01" min="0.01" oninput="updateCosts()"/>
+      <span style="font-size:0.75rem;color:var(--muted)">Edit to match your tariff</span>
+    </div>
+
+    <div class="projected-bar">
+      <div class="bar-label">
+        <span>Month progress</span>
+        <span id="barPct">—</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="barFill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Simulated demo data · refresh to generate new session · ⚡ Home Electricity Monitor</footer>
+
+<script>
+// ─── Simulation seed ──────────────────────────────────────────────
+const DAY = 24, now = new Date();
+const todayDayOfMonth = now.getDate();
+const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+
+function rnd(min, max) { return min + Math.random()*(max-min); }
+function fmt(n, d=1) { return n.toFixed(d); }
+function fmtMoney(n) { return '$'+n.toFixed(2); }
+
+// Build 30 days of daily kWh data
+const daily30 = Array.from({length:30}, (_,i) => {
+  const base = rnd(8, 22);
+  return +fmt(base + Math.sin(i*0.7)*2, 2);
+});
+
+// Build 12 months of monthly kWh data
+const monthly12 = Array.from({length:12}, () => +fmt(rnd(280, 620), 1));
+
+// Today simulated usage so far
+const hoursElapsed = now.getHours() + now.getMinutes()/60;
+const todayKwh = +(daily30[29] * (hoursElapsed/24)).toFixed(2);
+const monthKwh = daily30.slice(0, todayDayOfMonth-1).reduce((a,b)=>a+b,0) + todayKwh;
+const lastMonthKwh = monthly12[10];
+const weekKwh = daily30.slice(-7).reduce((a,b)=>a+b,0);
+
+const peakKw  = +(rnd(2.5, 4.8)).toFixed(2);
+const avgKw7d = +(weekKwh / (7*24)).toFixed(3);
+
+// ─── Rate & Costs ─────────────────────────────────────────────────
+let RATE = 0.13;
+
+function updateCosts() {
+  RATE = parseFloat(document.getElementById('rateInput').value) || 0.13;
+  const costTodayVal  = todayKwh * RATE;
+  const costWeekVal   = weekKwh * RATE;
+  const costMonthVal  = monthKwh * RATE;
+  const costLastM     = lastMonthKwh * RATE;
+  const projected     = (monthKwh / (todayDayOfMonth || 1)) * daysInMonth * RATE;
+
+  document.getElementById('costToday').textContent     = fmtMoney(costTodayVal);
+  document.getElementById('costWeek').textContent      = fmtMoney(costWeekVal);
+  document.getElementById('costMonth').textContent     = fmtMoney(costMonthVal);
+  document.getElementById('costLastMonth').textContent = fmtMoney(costLastM);
+  document.getElementById('billEst').textContent       = fmtMoney(projected);
+
+  const diff = projected - costLastM;
+  const billTrend = document.getElementById('billTrend');
+  if (diff > 0) {
+    billTrend.textContent = `↑ ${fmtMoney(Math.abs(diff))} vs last month`;
+    billTrend.className = 'trend up';
+  } else {
+    billTrend.textContent = `↓ ${fmtMoney(Math.abs(diff))} vs last month`;
+    billTrend.className = 'trend down';
+  }
+
+  const pct = Math.min(100, Math.round((todayDayOfMonth / daysInMonth)*100));
+  document.getElementById('barPct').textContent = `Day ${todayDayOfMonth} of ${daysInMonth}`;
+  document.getElementById('barFill').style.width = pct+'%';
+}
+
+// ─── Static Labels ────────────────────────────────────────────────
+document.getElementById('todayKwh').textContent = fmt(todayKwh);
+document.getElementById('peakKw').textContent   = fmt(peakKw);
+document.getElementById('avgKw').textContent    = fmt(avgKw7d,3);
+document.getElementById('co2').textContent      = fmt(todayKwh * 0.233); // 0.233 kg/kWh avg
+
+document.getElementById('monthKwh').textContent = fmt(monthKwh,1);
+const monthDiff = monthKwh - lastMonthKwh;
+const monthTrend = document.getElementById('monthTrend');
+if (monthDiff > 0) {
+  monthTrend.textContent = `↑ ${fmt(Math.abs(monthDiff),1)} kWh vs last month`;
+  monthTrend.className = 'trend up';
+} else {
+  monthTrend.textContent = `↓ ${fmt(Math.abs(monthDiff),1)} kWh vs last month`;
+  monthTrend.className = 'trend down';
+}
+
+updateCosts();
+
+// ─── Gauge animation ──────────────────────────────────────────────
+const MAX_KW = 5;
+let currentKw = rnd(0.8, 3.2);
+const gaugeFill = document.getElementById('gaugeFill');
+const gaugeVal  = document.getElementById('gaugeVal');
+
+function setGauge(kw) {
+  const pct = Math.min(1, kw / MAX_KW);
+  const TOTAL = 345;
+  gaugeFill.style.strokeDashoffset = TOTAL - (TOTAL * pct);
+
+  // colour shift
+  if (pct < 0.5)       gaugeFill.style.stroke = 'url(#gaugeGrad)';
+  else if (pct < 0.8)  gaugeFill.style.stroke = 'var(--warn)';
+  else                 gaugeFill.style.stroke = 'var(--danger)';
+
+  gaugeVal.textContent = kw.toFixed(2);
+}
+
+setGauge(currentKw);
+
+setInterval(() => {
+  // random walk
+  currentKw += rnd(-0.3, 0.3);
+  currentKw = Math.max(0.1, Math.min(MAX_KW, currentKw));
+  setGauge(currentKw);
+}, 2000);
+
+// ─── Chart.js defaults ────────────────────────────────────────────
+Chart.defaults.color = '#8892a4';
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+// ─── Spark chart (7d daily) ───────────────────────────────────────
+const sparkCtx = document.getElementById('sparkChart').getContext('2d');
+const sparkDays = daily30.slice(-7);
+const sparkLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+new Chart(sparkCtx, {
+  type: 'bar',
+  data: {
+    labels: sparkLabels,
+    datasets: [{
+      data: sparkDays,
+      backgroundColor: sparkDays.map(v =>
+        v > 18 ? 'rgba(239,68,68,0.7)' : v > 14 ? 'rgba(245,158,11,0.7)' : 'rgba(79,142,247,0.7)'
+      ),
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: {
+      callbacks: { label: c => ` ${c.raw} kWh` }
+    }},
+    scales: {
+      x: { grid: { display: false }, border: { display: false } },
+      y: {
+        grid: { color: 'rgba(46,51,80,0.6)', drawTicks: false },
+        border: { display: false },
+        ticks: { callback: v => v+' kWh', padding: 6 }
+      }
+    }
+  }
+});
+
+// ─── Donut chart (cost breakdown) ────────────────────────────────
+const donutCtx = document.getElementById('donutChart').getContext('2d');
+
+const donutSlices = [
+  { label: 'HVAC', value: 38, color: '#4f8ef7' },
+  { label: 'Water Heater', value: 22, color: '#34d399' },
+  { label: 'Appliances', value: 18, color: '#f59e0b' },
+  { label: 'Lighting', value: 12, color: '#a78bfa' },
+  { label: 'Other', value: 10, color: '#8892a4' },
+];
+
+new Chart(donutCtx, {
+  type: 'doughnut',
+  data: {
+    labels: donutSlices.map(d=>d.label),
+    datasets: [{ data: donutSlices.map(d=>d.value),
+      backgroundColor: donutSlices.map(d=>d.color),
+      borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+      legend: { position: 'right', labels: { boxWidth: 10, padding: 10, font:{size:10} } },
+      tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw}%` } }
+    }
+  }
+});
+
+// ─── History chart ────────────────────────────────────────────────
+const histCtx = document.getElementById('historyChart').getContext('2d');
+let histChart;
+
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function buildDataset(range) {
+  if (range === '7d') {
+    const labels = Array.from({length:7},(_,i)=>{
+      const d = new Date(now); d.setDate(d.getDate()-6+i);
+      return d.toLocaleDateString('en-US',{weekday:'short',month:'numeric',day:'numeric'});
+    });
+    return { labels, data: daily30.slice(-7), unit:'kWh' };
+  }
+  if (range === '30d') {
+    const labels = Array.from({length:30},(_,i)=>{
+      const d = new Date(now); d.setDate(d.getDate()-29+i);
+      return `${d.getMonth()+1}/${d.getDate()}`;
+    });
+    return { labels, data: daily30, unit:'kWh' };
+  }
+  // 12m
+  const labels = Array.from({length:12},(_,i)=>{
+    const d = new Date(now); d.setMonth(d.getMonth()-11+i);
+    return monthNames[d.getMonth()];
+  });
+  return { labels, data: monthly12, unit:'kWh' };
+}
+
+function renderHistChart(range='7d') {
+  const { labels, data, unit } = buildDataset(range);
+  if (histChart) histChart.destroy();
+  histChart = new Chart(histCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        fill: true,
+        tension: 0.4,
+        borderColor: '#4f8ef7',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#4f8ef7',
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        backgroundColor: (ctx) => {
+          const gr = ctx.chart.ctx.createLinearGradient(0,0,0,220);
+          gr.addColorStop(0,'rgba(79,142,247,0.25)');
+          gr.addColorStop(1,'rgba(79,142,247,0)');
+          return gr;
+        }
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => ` ${c.raw} ${unit}` } }
+      },
+      scales: {
+        x: { grid: { display: false }, border: { display: false },
+              ticks: { maxTicksLimit: 8, maxRotation: 0 } },
+        y: { grid: { color: 'rgba(46,51,80,0.6)', drawTicks: false },
+             border: { display: false },
+             ticks: { callback: v => v+' '+unit, padding: 6 } }
+      }
+    }
+  });
+}
+
+renderHistChart('7d');
+
+function switchRange(btn, range) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistChart(range);
+}
+</script>
+</body>
+</html>
