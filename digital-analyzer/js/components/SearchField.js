@@ -1,6 +1,7 @@
 /**
  * SearchField — labelled search input with a leading icon.
  * Input is debounced so filtering does not run on every keystroke.
+ * `clearable` adds a clear button that appears once the field has text.
  */
 (function (DA) {
   'use strict';
@@ -35,10 +36,32 @@
     var icon = DA.icons.search();
     icon.setAttribute('class', 'search-field__icon');
 
-    return el('div', { className: 'search-field' }, [
+    var clear = options.clearable
+      ? el('button', {
+          className: 'search-field__clear',
+          attrs: { type: 'button', 'aria-label': 'Clear search', hidden: true },
+          on: {
+            click: function () {
+              input.value = '';
+              clear.hidden = true;
+              input.focus();
+              if (options.onSearch) options.onSearch('');
+            }
+          }
+        }, [DA.icons.closeCircle(16)])
+      : null;
+
+    if (clear) {
+      input.addEventListener('input', function () { clear.hidden = !input.value; });
+    }
+
+    return el('div', {
+      className: 'search-field' + (options.clearable ? ' search-field--clearable' : '')
+    }, [
       el('label', { className: 'u-visually-hidden', text: options.label, attrs: { for: id } }),
       icon,
-      input
+      input,
+      clear
     ]);
   };
 })(window.DA);

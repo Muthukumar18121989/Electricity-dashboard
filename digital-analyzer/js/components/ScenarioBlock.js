@@ -106,6 +106,12 @@
               attrs: {
                 href: '#accounts-' + bid.bidNumber,
                 'aria-label': 'Accounts associated with bid ' + bid.bidNumber
+              },
+              on: {
+                click: function (event) {
+                  event.preventDefault();
+                  if (context.onOpenAccounts) context.onOpenAccounts(bid, scenario);
+                }
               }
             }, [el('span', { text: 'Accounts' }), DA.icons.settings(14)]);
           }

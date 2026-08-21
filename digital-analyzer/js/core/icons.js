@@ -118,6 +118,23 @@
     );
   }
 
+  function box(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M20.5 8.2v7.6a1.5 1.5 0 0 1-.78 1.32l-6.98 3.83a1.5 1.5 0 0 1-1.48 0l-6.98-3.83A1.5 1.5 0 0 1 3.5 15.8V8.2a1.5 1.5 0 0 1 .78-1.32l6.98-3.83a1.5 1.5 0 0 1 1.48 0l6.98 3.83A1.5 1.5 0 0 1 20.5 8.2Z"/>' +
+      '<path ' + STROKE + ' d="m3.8 7.4 8.2 4.5 8.2-4.5M12 20.8v-8.9"/>',
+      { size: size || 26 }
+    );
+  }
+
+  function boxOff(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M20.5 8.2v7.6a1.5 1.5 0 0 1-.78 1.32l-6.98 3.83a1.5 1.5 0 0 1-1.48 0l-6.98-3.83A1.5 1.5 0 0 1 3.5 15.8V8.2a1.5 1.5 0 0 1 .78-1.32l6.98-3.83a1.5 1.5 0 0 1 1.48 0l6.98 3.83A1.5 1.5 0 0 1 20.5 8.2Z"/>' +
+      '<path ' + STROKE + ' d="m3.8 7.4 8.2 4.5 8.2-4.5M12 20.8v-8.9"/>' +
+      '<path ' + STROKE + ' d="m3 3 18 18"/>',
+      { size: size || 26 }
+    );
+  }
+
   function settings(size) {
     return svg(
       '<circle ' + STROKE + ' cx="12" cy="12" r="2.9"/>' +
@@ -190,6 +207,8 @@
     download: download,
     info: info,
     check: check,
+    box: box,
+    boxOff: boxOff,
     settings: settings,
     plusCircle: plusCircle,
     file: file,

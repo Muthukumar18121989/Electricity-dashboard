@@ -15,9 +15,13 @@ Open `index.html` directly in a browser; there is no build step.
 | Analyzer Packets (landing after sign-in) | `js/pages/analyzerPacketsPage.js` | Scope switch, search, primary action, 9-column table |
 | Customer Details (New Analyzer Packet, step 1) | `js/pages/customerDetailsPage.js` | Reached from **New Analyzer Packet**; customer lookup, shipping profile, optional PLD upload |
 | Create Scenarios and Analyzer Packet (step 2) | `js/pages/createScenariosPage.js` | Reached from **Source Data**, arriving with the sourcing-in-progress dialog open; the scenario row expands to its sourced bids |
+| Account Association | `js/pages/accountAssociationPage.js` | Reached from **Accounts** on a bid in an editable scenario; parent > subparent > account tree |
 
-Screens swap below the persistent header via `navigate()` in `js/main.js` —
-the single seam to replace when real routing arrives.
+Screens swap below the header via `navigate()` in `js/main.js` — the single
+seam to replace when real routing arrives. The header re-renders per screen, so
+a view can add its own return path; Account Association uses that for
+**Back to My Analyzers**. The packet under construction is held across
+navigation, so leaving a screen and returning keeps its state.
 
 ## Structure
 
@@ -50,7 +54,8 @@ later without changing the design system.
 `RecordLink` · `EmptyState` · `Field` / `SelectField` / `HelpButton` ·
 `ChipInput` · `Toggle` · `Accordion` · `FileDropzone` / `FileItem` ·
 `Modal` (dialog, wide dialog, or right-anchored drawer) · `Alert` ·
-`SummaryPanel` / `Detail` · `Checkbox` · `ScenarioBlock` · `Tabs`
+`SummaryPanel` / `Detail` · `Checkbox` · `ScenarioBlock` · `Tabs` ·
+`StatRow` · `Breadcrumb`
 
 Composed dialogs live in `js/dialogs/`.
 
@@ -120,6 +125,9 @@ purpose and are each a one-line revert:
    inside the box — rather than the notched outline the reference draws there,
    so every select in the app looks the same.
 
+8. **The count tiles use line icons** from the product's own icon set rather
+   than the reference's 3D isometric illustrations.
+
 Only the Accessorial view is documented by a screenshot. The Services view
 mirrors it, naming its first column `Service` and dropping the accessorial
 filter; both show `No data available.` until source data is wired up.
@@ -150,7 +158,17 @@ both reference examples: 05/23/2026–08/15/2026 is 13 weeks and
 05/17/2025–04/04/2026 is 47 weeks. It is the only calculation in the UI; no
 other business logic is assumed.
 
+## Account association
+
+The counts above the tree are derived from the accounts in it, using each
+account's `type` and `associated` flags — the tiles cannot drift from the rows.
+Checkboxes cascade: the parent and subparent rows select every account beneath
+them.
+
 ## Not yet wired
+
+On the account screen, `Search`, `Attach Account` and `Review Changes` are
+inert, and `Review Changes` renders disabled as in the reference.
 
 The form does no validation, and on the scenarios screen `Download Scenario
 Summary`, `Create New Scenario`, `Update Description` and `Proceed to Analyzer

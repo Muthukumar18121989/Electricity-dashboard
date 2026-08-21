@@ -1,64 +1,96 @@
 /**
  * Application entry point — mounts the app shell and routes between screens.
  *
- * Screens are swapped below the persistent header. When real routing arrives,
- * `navigate` is the single seam to replace.
+ * Screens are swapped below the header, which is re-rendered per screen so a
+ * view can add its own return path. When real routing arrives, `navigate` is
+ * the single seam to replace.
  */
 (function (DA) {
   'use strict';
 
   var el = DA.dom.el;
+  var headerSlot = el('div', { className: 'app-shell__header' });
   var viewport = el('div', { className: 'app-shell__view' });
 
+  // The packet under construction, so a screen can be revisited with its state.
+  var current = { packet: null };
+
   var views = {
-    packets: function () {
-      return DA.pages.AnalyzerPacketsPage({
-        rows: DA.data.analyzerPackets,
-        currentUser: DA.session.currentUser,
-        onNewPacket: function () { navigate('customer-details'); }
-      });
+    packets: {
+      render: function () {
+        return DA.pages.AnalyzerPacketsPage({
+          rows: DA.data.analyzerPackets,
+          currentUser: DA.session.currentUser,
+          onNewPacket: function () { navigate('customer-details'); }
+        });
+      }
     },
-    'customer-details': function () {
-      return DA.pages.CustomerDetailsPage({
-        onBack: function () { navigate('packets'); },
-        onSourceData: function (input) {
-          navigate('create-scenarios', {
-            packet: DA.data.buildPacket(input, DA.session.currentUser),
-            showSourcingDialog: true
-          });
-        }
-      });
+
+    'customer-details': {
+      render: function () {
+        return DA.pages.CustomerDetailsPage({
+          onBack: function () { navigate('packets'); },
+          onSourceData: function (input) {
+            current.packet = DA.data.buildPacket(input, DA.session.currentUser);
+            navigate('create-scenarios', { showSourcingDialog: true });
+          }
+        });
+      }
     },
-    'create-scenarios': function (params) {
-      return DA.pages.CreateScenariosPage({
-        packet: params.packet,
-        showSourcingDialog: params.showSourcingDialog,
-        onBack: function () { navigate('customer-details'); }
-      });
+
+    'create-scenarios': {
+      render: function (params) {
+        return DA.pages.CreateScenariosPage({
+          packet: current.packet,
+          showSourcingDialog: params.showSourcingDialog,
+          onBack: function () { navigate('customer-details'); },
+          onOpenAccounts: function (bid, scenario) {
+            navigate('account-association', { bid: bid, scenario: scenario });
+          }
+        });
+      }
+    },
+
+    'account-association': {
+      header: function () {
+        return { backLink: { label: 'Back to My Analyzers', onClick: function () { navigate('packets'); } } };
+      },
+      render: function (params) {
+        return DA.pages.AccountAssociationPage({
+          bid: params.bid,
+          scenario: params.scenario,
+          packet: current.packet,
+          onBack: function () { navigate('create-scenarios'); }
+        });
+      }
     }
   };
 
   function navigate(name, params) {
     var view = views[name] || views.packets;
-    DA.dom.clear(viewport).appendChild(view(params || {}));
+    var header = view.header ? view.header() : {};
+
+    DA.dom.clear(headerSlot).appendChild(
+      DA.components.AppHeader({
+        productName: 'Digital Analyzer',
+        user: DA.session.currentUser,
+        backLink: header.backLink
+      })
+    );
+
+    DA.dom.clear(viewport).appendChild(view.render(params || {}));
     viewport.scrollTop = 0;
-    var heading = viewport.querySelector('h1, h2');
-    if (heading) heading.setAttribute('tabindex', '-1');
+    var page = viewport.querySelector('.page');
+    if (page) page.scrollTop = 0;
   }
 
   function mount() {
     var root = document.getElementById('app');
     if (!root) return;
 
-    var shell = el('div', { className: 'app-shell' }, [
-      DA.components.AppHeader({
-        productName: 'Digital Analyzer',
-        user: DA.session.currentUser
-      }),
-      viewport
-    ]);
-
-    DA.dom.clear(root).appendChild(shell);
+    DA.dom.clear(root).appendChild(
+      el('div', { className: 'app-shell' }, [headerSlot, viewport])
+    );
     navigate('packets');
   }
 

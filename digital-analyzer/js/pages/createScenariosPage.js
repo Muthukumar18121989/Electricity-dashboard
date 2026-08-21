@@ -56,7 +56,10 @@
     function renderScenarios() {
       DA.dom.clear(scenarioList);
       scenarios.forEach(function (scenario) {
-        scenarioList.appendChild(C.ScenarioBlock(scenario, { packet: packet }));
+        scenarioList.appendChild(C.ScenarioBlock(scenario, {
+          packet: packet,
+          onOpenAccounts: options.onOpenAccounts
+        }));
       });
     }
 
