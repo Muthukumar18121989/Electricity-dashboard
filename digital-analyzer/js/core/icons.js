@@ -26,11 +26,71 @@
     );
   }
 
-  function chevronRight(size) {
+  function chevronRight(size, className) {
     return svg('<path ' + STROKE + ' d="m9.5 5.5 6.5 6.5-6.5 6.5"/>', {
       size: size || 14,
-      className: 'record-link__chevron'
+      className: className || 'record-link__chevron'
     });
+  }
+
+  function chevronLeft(size, className) {
+    return svg('<path ' + STROKE + ' d="M14.5 5.5 8 12l6.5 6.5"/>', {
+      size: size || 14,
+      className: className || ''
+    });
+  }
+
+  function chevronDown(size, className) {
+    return svg('<path ' + STROKE + ' d="m5.5 9 6.5 6.5L18.5 9"/>', {
+      size: size || 18,
+      className: className || ''
+    });
+  }
+
+  function help(size) {
+    return svg(
+      '<circle ' + STROKE + ' cx="12" cy="12" r="8.5"/>' +
+      '<path ' + STROKE + ' d="M9.7 9.4a2.35 2.35 0 1 1 2.9 2.65v1.4"/>' +
+      '<circle cx="12.6" cy="16.4" r="0.95" fill="currentColor"/>',
+      { size: size || 16 }
+    );
+  }
+
+  function close(size) {
+    return svg('<path ' + STROKE + ' d="m7 7 10 10M17 7 7 17"/>', { size: size || 14 });
+  }
+
+  function closeCircle(size) {
+    return svg(
+      '<circle ' + STROKE + ' cx="12" cy="12" r="8.5"/>' +
+      '<path ' + STROKE + ' d="m9.2 9.2 5.6 5.6m0-5.6-5.6 5.6"/>',
+      { size: size || 16 }
+    );
+  }
+
+  function checkCircle(size) {
+    return svg(
+      '<circle cx="12" cy="12" r="9" fill="currentColor"/>' +
+      '<path fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" ' +
+      'stroke-linejoin="round" d="m8 12.2 2.7 2.7L16 9.6"/>',
+      { size: size || 18 }
+    );
+  }
+
+  function upload(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M12 16V5.5m0 0L8.2 9.3M12 5.5l3.8 3.8"/>' +
+      '<path ' + STROKE + ' d="M4.5 15v2.5A1.5 1.5 0 0 0 6 19h12a1.5 1.5 0 0 0 1.5-1.5V15"/>',
+      { size: size || 22 }
+    );
+  }
+
+  function file(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8.5Z"/>' +
+      '<path ' + STROKE + ' d="M13.5 3.5v5h5"/>',
+      { size: size || 16 }
+    );
   }
 
   function plus(size) {
@@ -70,6 +130,14 @@
     bell: bell,
     search: search,
     chevronRight: chevronRight,
+    chevronLeft: chevronLeft,
+    chevronDown: chevronDown,
+    help: help,
+    close: close,
+    closeCircle: closeCircle,
+    checkCircle: checkCircle,
+    upload: upload,
+    file: file,
     plus: plus,
     inbox: inbox,
     upsShield: upsShield

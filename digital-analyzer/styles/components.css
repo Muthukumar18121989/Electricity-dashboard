@@ -499,3 +499,544 @@
   flex: 1 1 auto;
   min-height: 0;
 }
+
+/* --------------------------------------------------------------------------
+   Form card  (a centred, single-column workflow surface)
+   -------------------------------------------------------------------------- */
+.form-card {
+  width: 100%;
+  max-width: var(--form-card-width);
+  margin: 0 auto;
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+}
+
+.form-card__title {
+  margin-bottom: var(--space-5);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+/* Short gold rule under the heading — the screen's one brand flourish. */
+.form-card__title::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin-top: var(--space-2);
+  background-color: var(--color-brand-gold);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.form-grid__full {
+  grid-column: 1 / -1;
+}
+
+.form-divider {
+  height: 1px;
+  margin: var(--space-5) 0;
+  border: 0;
+  background-color: var(--color-border-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   Field  (outlined input with a floating label)
+   The placeholder carries the label text while empty; once the field has a
+   value the label rises to the border so the value is never unlabelled.
+   -------------------------------------------------------------------------- */
+.field {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.field__control {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.field__input {
+  width: 100%;
+  height: var(--field-height);
+  padding: var(--space-4) var(--field-padding-x) var(--space-1);
+  background-color: var(--color-field-bg);
+  border: 1px solid var(--color-field-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-field-text);
+  font-size: var(--font-size-md);
+  line-height: 1.25;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+/* Empty: no label is showing, so the placeholder sits optically centred. */
+.field__input:placeholder-shown {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.field__input::placeholder {
+  color: var(--color-field-placeholder);
+  opacity: 1;
+}
+
+.field__input:hover {
+  border-color: var(--color-field-border-hover);
+}
+
+.field__input:not(:placeholder-shown) {
+  border-color: var(--color-field-border-filled);
+}
+
+.field__input:focus {
+  border-color: var(--color-field-border-filled);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(31, 51, 72, 0.15);
+}
+
+.field__label {
+  position: absolute;
+  top: 5px;
+  left: calc(var(--field-padding-x) + 1px);
+  right: var(--field-padding-x);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-field-label);
+  font-size: var(--font-size-2xs);
+  line-height: 1.1;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity var(--duration-fast) var(--easing-standard),
+              transform var(--duration-fast) var(--easing-standard);
+}
+
+.field__input:not(:placeholder-shown) ~ .field__label,
+.field__input:focus ~ .field__label,
+.field--static-label .field__label {
+  opacity: 1;
+  transform: none;
+}
+
+.field__hint {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-snug);
+}
+
+.field__hint--end {
+  text-align: right;
+  font-size: var(--font-size-3xs);
+}
+
+/* Help affordance sitting outside the control, as in the reference. */
+.help-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 11px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-link);
+}
+
+.help-button:hover {
+  color: var(--color-text-link-hover);
+}
+
+/* --------------------------------------------------------------------------
+   Select field
+   -------------------------------------------------------------------------- */
+.select-field .field__input {
+  appearance: none;
+  padding-right: var(--space-7);
+  cursor: pointer;
+}
+
+.select-field .field__label {
+  opacity: 1;
+  transform: none;
+}
+
+.select-field__chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--field-padding-x);
+  transform: translateY(-50%);
+  color: var(--color-field-text);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Chip input  (linked records / OPP entries)
+   -------------------------------------------------------------------------- */
+.chip-input {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--field-height);
+  padding: var(--space-4) var(--space-2) var(--space-1);
+  background-color: var(--color-field-bg);
+  border: 1px solid var(--color-field-border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+.chip-input:hover {
+  border-color: var(--color-field-border-hover);
+}
+
+.chip-input:focus-within {
+  border-color: var(--color-field-border-filled);
+  box-shadow: 0 0 0 2px rgba(31, 51, 72, 0.15);
+}
+
+.chip-input--filled {
+  border-color: var(--color-field-border-filled);
+}
+
+.chip-input--multiline {
+  min-height: 62px;
+}
+
+.chip-input__label {
+  position: absolute;
+  top: 5px;
+  left: var(--space-3);
+  color: var(--color-field-label);
+  font-size: var(--font-size-2xs);
+  line-height: 1.1;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity var(--duration-fast) var(--easing-standard),
+              transform var(--duration-fast) var(--easing-standard);
+}
+
+.chip-input--labelled .chip-input__label {
+  opacity: 1;
+  transform: none;
+}
+
+/* No label showing means no reserved room for it. */
+.chip-input:not(.chip-input--labelled) {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.chip-input__area {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 22px;
+}
+
+.chip-input--multiline .chip-input__area {
+  align-content: flex-start;
+  min-height: 34px;
+  padding: var(--space-1);
+  background-color: var(--color-field-bg-subtle);
+  border-radius: var(--radius-xs);
+}
+
+.chip-input__entry {
+  flex: 1 1 80px;
+  min-width: 60px;
+  padding: 0 var(--space-1);
+  background: none;
+  border: 0;
+  color: var(--color-field-text);
+  font-size: var(--font-size-md);
+}
+
+.chip-input__entry:focus {
+  outline: none;
+}
+
+.chip-input__entry::placeholder {
+  color: var(--color-field-placeholder);
+  opacity: 1;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding: 2px var(--space-1) 2px var(--space-2);
+  background-color: var(--color-field-bg-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--color-field-text);
+  font-size: var(--font-size-sm);
+}
+
+.chip__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip__remove {
+  display: inline-flex;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+}
+
+.chip__remove:hover {
+  color: var(--color-error);
+}
+
+/* --------------------------------------------------------------------------
+   Toggle switch
+   -------------------------------------------------------------------------- */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-md);
+}
+
+.toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  padding: 0;
+  background-color: var(--color-border-strong);
+  border: 0;
+  border-radius: var(--radius-pill);
+  transition: background-color var(--duration-base) var(--easing-standard);
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background-color: var(--color-surface);
+  border-radius: 50%;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--duration-base) var(--easing-standard);
+}
+
+.toggle[aria-checked="true"] {
+  background-color: var(--color-primary);
+}
+
+.toggle[aria-checked="true"]::after {
+  transform: translateX(20px);
+}
+
+/* --------------------------------------------------------------------------
+   Accordion
+   -------------------------------------------------------------------------- */
+.accordion {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+}
+
+.accordion__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  background: none;
+  border: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  text-align: left;
+}
+
+.accordion__trigger:hover {
+  color: var(--color-text-link);
+}
+
+.accordion__icon {
+  color: var(--color-text-secondary);
+  transition: transform var(--duration-base) var(--easing-standard);
+}
+
+.accordion__trigger[aria-expanded="true"] .accordion__icon {
+  transform: rotate(90deg);
+}
+
+.accordion__panel {
+  padding: 0 var(--space-4) var(--space-5);
+}
+
+.accordion__panel[hidden] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   File dropzone + attached file
+   -------------------------------------------------------------------------- */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-7) var(--space-5);
+  background-color: var(--color-surface-sunken);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              background-color var(--duration-fast) var(--easing-standard);
+}
+
+.dropzone--active {
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+}
+
+.dropzone__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-border-subtle);
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+}
+
+.dropzone__prompt {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+.dropzone__browse {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--color-text-link);
+  font: inherit;
+  text-decoration: underline;
+}
+
+.dropzone__meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.attachment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.attachment__title {
+  width: 100%;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.file-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--field-height);
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.file-item__icon {
+  color: var(--color-text-secondary);
+}
+
+.file-item__name {
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-item__status {
+  color: var(--color-success);
+}
+
+.file-item__remove {
+  display: inline-flex;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+}
+
+.file-item__remove:hover {
+  color: var(--color-error);
+}
+
+/* --------------------------------------------------------------------------
+   Page actions  (workflow footer beneath the card)
+   -------------------------------------------------------------------------- */
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: var(--form-card-width);
+  margin: var(--space-5) auto 0;
+}
+
+.button--pill {
+  border-radius: var(--radius-pill);
+  padding: 0 var(--space-6);
+}
+
+.button--link {
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-2);
+  background: none;
+  border-color: transparent;
+  color: var(--color-text-link);
+}
+
+.button--link:hover {
+  color: var(--color-text-link-hover);
+  text-decoration: underline;
+}
+
+/* Grid item wrapper: control row plus any hint beneath it. */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}

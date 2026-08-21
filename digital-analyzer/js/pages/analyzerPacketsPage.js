@@ -135,7 +135,8 @@
 
     var newPacketButton = C.Button({
       label: 'New Analyzer Packet',
-      variant: 'primary'
+      variant: 'primary',
+      onClick: function () { if (options.onNewPacket) options.onNewPacket(); }
     });
 
     var panel = C.Panel({

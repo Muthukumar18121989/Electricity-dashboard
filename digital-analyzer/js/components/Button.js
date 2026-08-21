@@ -1,5 +1,7 @@
 /**
- * Button — variants: primary (brand gold), secondary, ghost.
+ * Button — variants: primary (brand gold), secondary, ghost, link.
+ * `shape: 'pill'` fully rounds it; `iconPosition: 'end'` puts the icon after
+ * the label, which is how the workflow's forward action is drawn.
  * Usage: DA.components.Button({ label: 'New Analyzer Packet', variant: 'primary' })
  */
 (function (DA) {
@@ -12,11 +14,15 @@
   DA.components.Button = function Button(options) {
     options = options || {};
     var variant = options.variant || 'secondary';
+    var className =
+      'button button--' + variant +
+      (options.shape === 'pill' ? ' button--pill' : '') +
+      (options.className ? ' ' + options.className : '');
 
     return el(
       'button',
       {
-        className: 'button button--' + variant + (options.className ? ' ' + options.className : ''),
+        className: className,
         attrs: {
           type: options.type || 'button',
           disabled: options.disabled || false,
@@ -24,7 +30,9 @@
         },
         on: options.onClick ? { click: options.onClick } : {}
       },
-      [options.icon || null, el('span', { text: options.label })]
+      options.iconPosition === 'end'
+        ? [el('span', { text: options.label }), options.icon || null]
+        : [options.icon || null, el('span', { text: options.label })]
     );
   };
 

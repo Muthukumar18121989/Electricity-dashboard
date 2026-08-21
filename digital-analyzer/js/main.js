@@ -1,10 +1,37 @@
 /**
- * Application entry point — mounts the app shell and the landing screen.
+ * Application entry point — mounts the app shell and routes between screens.
+ *
+ * Screens are swapped below the persistent header. When real routing arrives,
+ * `navigate` is the single seam to replace.
  */
 (function (DA) {
   'use strict';
 
   var el = DA.dom.el;
+  var viewport = el('div', { className: 'app-shell__view' });
+
+  var views = {
+    packets: function () {
+      return DA.pages.AnalyzerPacketsPage({
+        rows: DA.data.analyzerPackets,
+        currentUser: DA.session.currentUser,
+        onNewPacket: function () { navigate('customer-details'); }
+      });
+    },
+    'customer-details': function () {
+      return DA.pages.CustomerDetailsPage({
+        onBack: function () { navigate('packets'); }
+      });
+    }
+  };
+
+  function navigate(name) {
+    var view = views[name] || views.packets;
+    DA.dom.clear(viewport).appendChild(view());
+    viewport.scrollTop = 0;
+    var heading = viewport.querySelector('h1, h2');
+    if (heading) heading.setAttribute('tabindex', '-1');
+  }
 
   function mount() {
     var root = document.getElementById('app');
@@ -15,14 +42,14 @@
         productName: 'Digital Analyzer',
         user: DA.session.currentUser
       }),
-      DA.pages.AnalyzerPacketsPage({
-        rows: DA.data.analyzerPackets,
-        currentUser: DA.session.currentUser
-      })
+      viewport
     ]);
 
     DA.dom.clear(root).appendChild(shell);
+    navigate('packets');
   }
+
+  DA.app = { navigate: navigate };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mount);

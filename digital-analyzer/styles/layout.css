@@ -19,6 +19,7 @@
   min-height: 0;
   margin: 0 auto;
   padding: var(--page-gutter);
+  overflow-y: auto;
 }
 
 .page__panel {
@@ -102,4 +103,12 @@
     flex: 1 1 0;
     padding: 0 var(--space-3);
   }
+}
+
+/* View slot beneath the persistent header — screens swap in here. */
+.app-shell__view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
 }

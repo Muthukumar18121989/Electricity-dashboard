@@ -52,6 +52,16 @@
   --color-neutral-badge: #4a4a4a;
   --color-neutral-badge-subtle: #eeeeee;
 
+  /* ---- Form fields ------------------------------------------------------ */
+  --color-field-bg: #ffffff;
+  --color-field-bg-subtle: #eef2f6;
+  --color-field-border: #a9bccd;
+  --color-field-border-hover: #7d97ae;
+  --color-field-border-filled: #1f3348;
+  --color-field-label: #8a6d00;
+  --color-field-placeholder: #6b7a89;
+  --color-field-text: #1f3348;
+
   /* ---- Disabled --------------------------------------------------------- */
   --color-disabled-bg: #f0f0f0;
   --color-disabled-border: #e0e0e0;
@@ -66,6 +76,7 @@
   --font-family-base: "Roboto", "Segoe UI", Arial, "Helvetica Neue", system-ui, -apple-system, sans-serif;
   --font-family-numeric: "Roboto", "Segoe UI", system-ui, sans-serif;
 
+  --font-size-3xs: 0.625rem;   /* 10px — fine print under a control         */
   --font-size-2xs: 0.6875rem;  /* 11px — badge text                          */
   --font-size-xs: 0.75rem;     /* 12px — metadata, helper text               */
   --font-size-sm: 0.8125rem;   /* 13px — table body, labels, controls        */
@@ -119,6 +130,10 @@
   --control-height-lg: 38px;
   --icon-button-size: 36px;
   --avatar-size: 38px;
+
+  --field-height: 42px;
+  --field-padding-x: var(--space-3);
+  --form-card-width: 700px;
 
   --table-header-height: 42px;
   --table-row-height: 36px;

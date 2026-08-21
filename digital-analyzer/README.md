@@ -13,6 +13,10 @@ Open `index.html` directly in a browser; there is no build step.
 | Screen | File | Notes |
 | --- | --- | --- |
 | Analyzer Packets (landing after sign-in) | `js/pages/analyzerPacketsPage.js` | Scope switch, search, primary action, 9-column table |
+| Customer Details (New Analyzer Packet, step 1) | `js/pages/customerDetailsPage.js` | Reached from **New Analyzer Packet**; customer lookup, shipping profile, optional PLD upload |
+
+Screens swap below the persistent header via `navigate()` in `js/main.js` —
+the single seam to replace when real routing arrives.
 
 ## Structure
 
@@ -42,7 +46,16 @@ later without changing the design system.
 
 `AppHeader` · `Panel` · `Button` / `IconButton` · `Avatar` ·
 `SegmentedControl` · `SearchField` · `StatusBadge` · `DataTable` /
-`RecordLink` · `EmptyState`
+`RecordLink` · `EmptyState` · `Field` / `SelectField` / `HelpButton` ·
+`ChipInput` · `Toggle` · `Accordion` · `FileDropzone` / `FileItem`
+
+### Fields
+
+`Field` uses the placeholder to carry the label while empty and floats the
+label to the border once the field holds a value, so a filled field is never
+left unlabelled. `ChipInput` commits entries on space or enter (and splits a
+pasted list); with `multiple: false` it holds a single value, which is how the
+parent/child customer lookup behaves.
 
 ## Design system
 
@@ -91,6 +104,24 @@ purpose and are each a one-line revert:
    legible vertical rhythm. Revert via `--table-row-height`.
 3. **Search field is slightly wider** so the full placeholder is visible instead
    of being clipped mid-word. Revert via `.search-field { max-width }`.
+4. **`Add Duration* (In Weeks)` is white**, like every other filled field. The
+   reference tints it, which reads as a different kind of control than the
+   identical fields above it.
+5. **The OPP hint wraps to two lines.** The reference fits it on one at roughly
+   8.5px, which is below a legible size; it is set at 10px here.
+
+## Derived values
+
+`Duration : N Weeks` is computed from the shipping profile window as whole
+weeks covering both end dates — `ceil((days between + 1) / 7)`. This reproduces
+both reference examples: 05/23/2026–08/15/2026 is 13 weeks and
+05/17/2025–04/04/2026 is 47 weeks. It is the only calculation in the UI; no
+other business logic is assumed.
+
+## Not yet wired
+
+`Source Data >` is inert, and the form does no validation — both wait on the
+workflow rules. The help (`?`) buttons carry placeholder text.
 
 ## Demo data
 
