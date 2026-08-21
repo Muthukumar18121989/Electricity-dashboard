@@ -49,7 +49,8 @@ later without changing the design system.
 `SegmentedControl` · `SearchField` · `StatusBadge` · `DataTable` /
 `RecordLink` · `EmptyState` · `Field` / `SelectField` / `HelpButton` ·
 `ChipInput` · `Toggle` · `Accordion` · `FileDropzone` / `FileItem` ·
-`Modal` · `Alert` · `SummaryPanel` / `Detail` · `Checkbox`
+`Modal` (dialog or right-anchored drawer) · `Alert` · `SummaryPanel` /
+`Detail` · `Checkbox` · `ScenarioBlock`
 
 ### Fields
 
@@ -106,9 +107,9 @@ purpose and are each a one-line revert:
    legible vertical rhythm. Revert via `--table-row-height`.
 3. **Search field is slightly wider** so the full placeholder is visible instead
    of being clipped mid-word. Revert via `.search-field { max-width }`.
-4. **`Add Duration* (In Weeks)` is white**, like every other filled field. The
-   reference tints it, which reads as a different kind of control than the
-   identical fields above it.
+4. **`Add Duration* (In Weeks)` and the drawer's `Scenario Name` are white**,
+   like every other filled field. The reference tints them, which reads as a
+   different kind of control than the identical fields around them.
 5. **The OPP hint wraps to two lines.** The reference fits it on one at roughly
    8.5px, which is below a legible size; it is set at 10px here.
 6. **The scenario name truncates on one line** rather than wrapping to two
@@ -151,6 +152,25 @@ placeholder text.
 Bid selection is live: each bid's checkbox and the header select-all toggle
 real state on the scenario record. Non-incented revenue has no checkbox — it is
 always included.
+
+## Scenarios
+
+`Create New Scenario` opens a drawer that copies an existing scenario. On save
+the new scenario is appended, opens, and folds the others away.
+
+The two kinds of scenario differ, following the reference:
+
+| | Baseline (`Scenario 0`, named *Current*) | User-created |
+| --- | --- | --- |
+| Status | `Current` | `Analysis In Progress` |
+| Bid table | 5 columns | adds **Account Association** |
+| Shipping profile | plain text, `S0-` | links, `S1-` and up |
+| Extras | — | Simulate New Bid, Save |
+
+Copying rewrites the shipping-profile prefix to the new scenario's index
+(`S0-UPS-PLD-1` becomes `S1-UPS-PLD-1`); profiles without an index prefix, like
+non-incented revenue's `UPS-PLD`, are left alone. The summary row shows the
+scenario's **name** then its **description** — the drawer captures both.
 
 ## Demo data
 

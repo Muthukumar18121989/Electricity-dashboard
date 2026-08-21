@@ -3,6 +3,7 @@
  *
  * Traps Tab inside the dialog, closes on Escape or a backdrop click, and hands
  * focus back to whatever the caller nominates on close.
+ * `variant: 'drawer'` anchors it to the right edge as a full-height side sheet.
  */
 (function (DA) {
   'use strict';
@@ -25,12 +26,18 @@
       on: { click: close }
     }, [DA.icons.close(18)]);
 
+    var drawer = options.variant === 'drawer';
+
     var dialog = el('div', {
-      className: 'modal__dialog',
+      className: 'modal__dialog' + (drawer ? ' modal__dialog--drawer' : ''),
       attrs: { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId }
     }, [
-      el('div', { className: 'modal__header' }, [
-        el('h2', { className: 'modal__title', text: options.title, attrs: { id: titleId } }),
+      el('div', { className: 'modal__header' + (drawer ? ' modal__header--drawer' : '') }, [
+        el('h2', {
+          className: 'modal__title' + (drawer ? ' title-rule' : ''),
+          text: options.title,
+          attrs: { id: titleId }
+        }),
         closeButton
       ]),
       el('div', { className: 'modal__body' }, [
@@ -39,7 +46,7 @@
     ]);
 
     var root = el('div', {
-      className: 'modal',
+      className: 'modal' + (drawer ? ' modal--drawer' : ''),
       on: {
         click: function (event) { if (event.target === root) close(); },
         keydown: function (event) {

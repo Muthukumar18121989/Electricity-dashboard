@@ -23,6 +23,37 @@
 
   DA.data = DA.data || {};
 
+  /**
+   * A new scenario copied from an existing one. Shipping profiles carry the
+   * scenario index, so a copy into Scenario 1 rewrites S0- profiles as S1-.
+   */
+  DA.data.copyScenario = function copyScenario(source, index, name, description) {
+    var format = DA.format;
+    var now = new Date();
+
+    return {
+      title: 'Scenario ' + index,
+      name: name,
+      description: description,
+      status: 'Analysis In Progress',
+      editable: true,
+      expanded: true,
+      included: true,
+      createdDate: format.formatDate(now),
+      lastModified: format.formatDate(now),
+      bids: source.bids.map(function (bid) {
+        return {
+          bidNumber: bid.bidNumber,
+          bidName: bid.bidName,
+          shippingProfile: bid.shippingProfile.replace(/^S\d+-/, 'S' + index + '-'),
+          construct: bid.construct,
+          selectable: bid.selectable,
+          selected: bid.selected
+        };
+      })
+    };
+  };
+
   DA.data.buildPacket = function buildPacket(input, currentUser) {
     var format = DA.format;
     var now = new Date();
@@ -47,9 +78,14 @@
       lastModifiedAt: timestamp,
       from: format.toDashDate(input.from),
       to: format.toDashDate(input.to),
-      scenario: {
+      scenarios: [{
         title: 'Scenario 0',
-        name: (weeks == null ? '' : weeks + ' WEEKS ') + 'UPS SHIPPING PROFILE',
+        name: 'Current',
+        description: (weeks == null ? '' : weeks + ' WEEKS ') + 'UPS SHIPPING PROFILE',
+        status: 'Current',
+        editable: false,
+        expanded: false,
+        included: true,
         createdDate: format.formatDate(now),
         lastModified: format.formatDate(now),
         bids: DA.data.scenarioBids.map(function (bid) {
@@ -62,7 +98,7 @@
             selected: bid.selectable
           };
         })
-      }
+      }]
     };
   };
 })(window.DA);

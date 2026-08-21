@@ -15,13 +15,16 @@
     'Completed': 'success',
     'Pending Review': 'warning',
     'Error Occurred': 'error',
-    'Draft': 'neutral'
+    'Draft': 'neutral',
+    'Current': 'neutral',
+    'Analysis In Progress': 'info'
   };
 
-  DA.components.StatusBadge = function StatusBadge(status) {
+  DA.components.StatusBadge = function StatusBadge(status, options) {
+    options = options || {};
     var tone = TONE_BY_STATUS[status] || 'neutral';
     return el('span', {
-      className: 'badge badge--' + tone,
+      className: 'badge badge--' + tone + (options.pill ? ' badge--pill' : ''),
       text: status,
       attrs: { title: status }
     });

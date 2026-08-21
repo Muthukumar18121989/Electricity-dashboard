@@ -30,24 +30,29 @@
     var id = options.id || nextId('field');
     var hintId = options.hint ? id + '-hint' : null;
 
-    var input = el('input', {
-      className: 'field__input',
+    var input = el(options.multiline ? 'textarea' : 'input', {
+      className: 'field__input' + (options.multiline ? ' field__input--multiline' : ''),
       attrs: {
         id: id,
-        type: options.type || 'text',
-        value: options.value || '',
+        type: options.multiline ? false : (options.type || 'text'),
+        rows: options.multiline ? (options.rows || 2) : false,
         placeholder: options.label,
         readonly: options.readOnly || false,
         'aria-describedby': hintId || false
       },
       on: options.onInput ? { input: options.onInput } : {}
     });
+    input.value = options.value || '';
 
     var wrapper = el('div', { className: 'form-field' }, [
       el('div', { className: 'field' }, [
         el('div', { className: 'field__control' }, [
           input,
-          el('label', { className: 'field__label', text: options.label, attrs: { for: id } })
+          el('label', {
+            className: options.hideLabel ? 'u-visually-hidden' : 'field__label',
+            text: options.label,
+            attrs: { for: id }
+          })
         ]),
         options.help ? DA.components.HelpButton(options.help) : null
       ]),

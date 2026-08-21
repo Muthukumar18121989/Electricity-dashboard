@@ -527,16 +527,6 @@
   color: var(--color-text-primary);
 }
 
-/* Short gold rule under the heading — the screen's one brand flourish. */
-.form-card__title::after {
-  content: "";
-  display: block;
-  width: 64px;
-  height: 3px;
-  margin-top: var(--space-2);
-  background-color: var(--color-brand-gold);
-}
-
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1511,4 +1501,147 @@
 
 .scenario__panel[hidden] {
   display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Title with the brand rule beneath it
+   -------------------------------------------------------------------------- */
+.title-rule::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin-top: var(--space-2);
+  background-color: var(--color-brand-gold);
+}
+
+/* --------------------------------------------------------------------------
+   Drawer  (Modal anchored to the right edge)
+   -------------------------------------------------------------------------- */
+.modal--drawer {
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.modal__dialog--drawer {
+  width: min(520px, 100%);
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  border-top: 0;
+  border-radius: 0;
+  animation: drawer-in var(--duration-base) var(--easing-standard);
+}
+
+@keyframes drawer-in {
+  from { transform: translateX(24px); opacity: 0.6; }
+  to { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal__dialog--drawer { animation: none; }
+}
+
+.modal__header--drawer {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+/* Close sits alone on the top line, the title beneath it. */
+.modal__header--drawer .modal__close {
+  order: -1;
+  align-self: flex-end;
+}
+
+.modal__header--drawer .modal__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-regular);
+}
+
+.alert--plain {
+  border-left-width: 1px;
+  border-left-color: var(--color-border);
+}
+
+.field__input--multiline {
+  height: auto;
+  min-height: 68px;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  line-height: var(--line-height-normal);
+  resize: vertical;
+}
+
+/* Stacked fields inside a drawer. */
+.drawer-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.drawer-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   Editable scenario extras
+   -------------------------------------------------------------------------- */
+.simulate-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.link-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-link);
+}
+
+.link-with-icon:hover {
+  color: var(--color-text-link-hover);
+}
+
+.scenario__status-menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+}
+
+.scenario__footer {
+  padding: var(--space-4);
+}
+
+.scenario-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Links inside a bid table are underlined, so they read as links against
+   dense tabular text. The icon in an icon link stays undecorated. */
+.data-table--warm td a:not(.link-with-icon) {
+  text-decoration: underline;
+}
+
+.link-with-icon > span {
+  text-decoration: underline;
 }

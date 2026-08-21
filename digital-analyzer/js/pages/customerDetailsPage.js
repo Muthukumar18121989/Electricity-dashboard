@@ -157,7 +157,7 @@
 
     var card = el('section', { className: 'form-card', attrs: { 'aria-labelledby': 'customer-details-title' } }, [
       el('h2', {
-        className: 'form-card__title',
+        className: 'form-card__title title-rule',
         text: 'Customer Details',
         attrs: { id: 'customer-details-title' }
       }),

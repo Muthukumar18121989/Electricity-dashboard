@@ -2,8 +2,8 @@
  * Create Scenarios and Analyzer Packet — step two of the workflow.
  *
  * Reached from "Source Data" on the Customer Details form, which arrives with
- * the sourcing-in-progress dialog open. Shows the packet that was created, the
- * scenarios on it, and the route onward to the analyzer packet.
+ * the sourcing-in-progress dialog open. Shows the packet that was created, its
+ * scenarios, and the route onward to the analyzer packet.
  */
 (function (DA) {
   'use strict';
@@ -16,6 +16,7 @@
   DA.pages.CreateScenariosPage = function CreateScenariosPage(options) {
     options = options || {};
     var packet = options.packet || {};
+    var scenarios = packet.scenarios || [];
     var owner = packet.owner || '';
 
     /* ---- Packet summary -------------------------------------------------- */
@@ -48,194 +49,101 @@
       ]
     });
 
-    /* ---- Scenario -------------------------------------------------------- */
+    /* ---- Scenarios -------------------------------------------------------- */
 
-    var scenario = packet.scenario || {};
+    var scenarioList = el('div', { className: 'scenario-list' });
 
-    var expanded = false;
-    var scenarioCard = el('div', { className: 'scenario__card' });
-    var bidPanelId = 'scenario-bids';
+    function renderScenarios() {
+      DA.dom.clear(scenarioList);
+      scenarios.forEach(function (scenario) {
+        scenarioList.appendChild(C.ScenarioBlock(scenario));
+      });
+    }
 
-    var toggle = el('button', {
-      className: 'scenario__toggle',
-      attrs: {
-        type: 'button',
-        'aria-expanded': 'false',
-        'aria-controls': bidPanelId,
-        'aria-label': 'Expand to find bid details'
-      },
-      on: {
-        click: function () {
-          expanded = !expanded;
-          renderScenarioCard();
-          toggle.focus();
-        }
-      }
+    /** Drawer: copy an existing scenario into a new one. */
+    function openCreateScenario(trigger) {
+      var nextIndex = scenarios.length;
+
+      var copyFrom = C.SelectField({
+        label: 'Choose Scenario to Copy',
+        value: scenarios[0].title,
+        options: scenarios.map(function (scenario) {
+          return { value: scenario.title, label: scenario.title };
+        })
+      });
+
+      var nameField = C.Field({
+        label: 'Scenario Name',
+        value: 'Scenario ' + nextIndex
+      });
+
+      var descriptionField = C.Field({
+        label: 'Scenario Description',
+        multiline: true,
+        hideLabel: true
+      });
+
+      var drawer = C.Modal({
+        variant: 'drawer',
+        title: 'Create New Scenario',
+        returnFocusTo: trigger,
+        body: el('div', { className: 'drawer-form' }, [
+          C.Alert({
+            plain: true,
+            message: 'Choose an existing Scenario to copy to create a new scenario.'
+          }),
+          copyFrom,
+          nameField,
+          descriptionField,
+          el('div', { className: 'drawer-form__actions' }, [
+            C.Button({
+              label: 'Save',
+              variant: 'primary',
+              shape: 'pill',
+              onClick: function () {
+                var source = scenarios.filter(function (scenario) {
+                  return scenario.title === copyFrom.select.value;
+                })[0] || scenarios[0];
+
+                // The new scenario opens; the others fold away behind it.
+                scenarios.forEach(function (scenario) { scenario.expanded = false; });
+                scenarios.push(DA.data.copyScenario(
+                  source,
+                  nextIndex,
+                  nameField.input.value || 'Scenario ' + nextIndex,
+                  descriptionField.input.value
+                ));
+
+                drawer.close();
+                renderScenarios();
+              }
+            })
+          ])
+        ])
+      });
+
+      drawer.open();
+    }
+
+    var createScenarioButton = C.Button({
+      label: 'Create New Scenario',
+      variant: 'outline',
+      shape: 'pill',
+      icon: DA.icons.chevronRight(14, ''),
+      iconPosition: 'end',
+      onClick: function () { openCreateScenario(createScenarioButton); }
     });
 
-    /** Bid rows, with a header checkbox that selects every selectable bid. */
-    function bidTable() {
-      var bids = scenario.bids || [];
-      var table;
+    renderScenarios();
 
-      function selectAll(checked) {
-        bids.forEach(function (bid) {
-          if (bid.selectable) bid.selected = checked;
-        });
-        DA.dom.clear(table.parentNode).appendChild(build());
-      }
-
-      function build() {
-        var allSelected = bids.every(function (bid) {
-          return !bid.selectable || bid.selected;
-        });
-
-        table = C.DataTable({
-          caption: 'Bids sourced for ' + scenario.title,
-          embedded: true,
-          headerTone: 'warm',
-          columns: [
-            {
-              key: 'select',
-              label: 'Select',
-              width: '48px',
-              className: 'is-select',
-              headerClassName: 'is-select',
-              renderHeader: function () {
-                return C.Checkbox({
-                  checked: allSelected,
-                  ariaLabel: 'Select all bids',
-                  onChange: selectAll
-                });
-              },
-              render: function (bid) {
-                if (!bid.selectable) return el('span');
-                return C.Checkbox({
-                  checked: bid.selected,
-                  ariaLabel: 'Include bid ' + bid.bidNumber,
-                  onChange: function (checked) { bid.selected = checked; }
-                });
-              }
-            },
-            { key: 'bidNumber', label: 'Bid Number', width: '125px' },
-            // Bid Name is left unsized so it absorbs the remaining width.
-            { key: 'bidName', label: 'Bid Name' },
-            {
-              key: 'shippingProfile',
-              label: 'Shipping Profile',
-              width: '190px',
-              className: 'is-muted'
-            },
-            { key: 'construct', label: 'Construct', width: '130px' }
-          ],
-          rows: bids
-        });
-        return table;
-      }
-
-      return el('div', { className: 'scenario__panel', attrs: { id: bidPanelId } }, [build()]);
-    }
-
-    function renderScenarioCard() {
-      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      toggle.setAttribute('aria-label', expanded ? 'Collapse bid details' : 'Expand to find bid details');
-      DA.dom.clear(toggle).appendChild(
-        expanded ? DA.icons.chevronUp(16) : DA.icons.chevronDown(16)
-      );
-
-      var cells = [
-        el('div', { className: 'scenario__cell' }, [
-          el('span', { className: 'scenario__cell-label', text: 'Current' })
-        ]),
-        el('div', { className: 'scenario__cell scenario__cell--name' }, [
-          el('span', {
-            className: 'scenario__cell-label',
-            text: scenario.name,
-            attrs: { title: scenario.name }
-          })
-        ]),
-        el('div', { className: 'scenario__cell' }, [
-          el('span', { className: 'scenario__cell-label', text: 'Created Date' }),
-          el('span', { className: 'scenario__cell-value', text: scenario.createdDate })
-        ]),
-        el('div', { className: 'scenario__cell scenario__cell--last' }, [
-          el('span', { className: 'scenario__cell-label', text: 'Last Modified' }),
-          el('span', { className: 'scenario__cell-value', text: scenario.lastModified })
-        ]),
-        el('div', { className: 'scenario__status' }, [
-          el('span', { className: 'badge badge--neutral badge--pill', text: 'Current' })
-        ])
-      ];
-
-      // The chevron rides the summary row when open and the hint line when
-      // closed, matching both reference states.
-      var row = el(
-        'div',
-        { className: 'scenario__row' + (expanded ? '' : ' scenario__row--indented') },
-        (expanded ? [toggle] : []).concat(cells).concat(
-          expanded
-            ? [el('div', { className: 'scenario__update' }, [
-                C.Button({
-                  label: 'Update Description',
-                  variant: 'link',
-                  icon: DA.icons.chevronRight(14, ''),
-                  iconPosition: 'end'
-                })
-              ])]
-            : []
-        )
-      );
-
-      DA.dom.clear(scenarioCard);
-      scenarioCard.appendChild(row);
-      scenarioCard.appendChild(
-        expanded
-          ? bidTable()
-          : el('div', { className: 'scenario__hint-row' }, [
-              toggle,
-              el('span', {
-                className: 'scenario__hint',
-                text: 'Expand To Find Bid Details',
-                on: { click: function () { toggle.click(); } }
-              })
-            ])
-      );
-    }
-
-    renderScenarioCard();
-
-    var scenarioBlock = el('section', { className: 'scenario', attrs: { 'aria-label': 'Scenarios' } }, [
-      el('div', { className: 'scenario__header' }, [
-        C.Checkbox({ checked: true, ariaLabel: 'Include ' + (scenario.title || 'scenario') }),
-        el('h3', { className: 'scenario__name', text: scenario.title }),
-        el('div', { className: 'scenario__header-actions' }, [
-          C.Button({
-            label: 'Download Scenario Summary',
-            variant: 'quiet-link',
-            icon: DA.icons.download(18)
-          }),
-          C.HelpButton('Downloads a summary of every scenario on this packet.')
-        ])
-      ]),
-      scenarioCard,
-      el('div', {}, [
-        C.Button({
-          label: 'Create New Scenario',
-          variant: 'outline',
-          shape: 'pill',
-          icon: DA.icons.chevronRight(14, ''),
-          iconPosition: 'end'
-        })
-      ])
-    ]);
-
-    /* ---- Composition ----------------------------------------------------- */
+    /* ---- Composition ------------------------------------------------------ */
 
     var panel = el('section', { className: 'panel panel--auto' }, [
       el('div', { className: 'panel__content' }, [
         summary,
         C.Alert({ message: 'Active Bids sourced for existing customers' }),
-        scenarioBlock
+        scenarioList,
+        el('div', {}, [createScenarioButton])
       ])
     ]);
 
