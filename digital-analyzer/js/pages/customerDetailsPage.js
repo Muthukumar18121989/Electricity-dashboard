@@ -10,32 +10,12 @@
 
   var el = DA.dom.el;
   var C = DA.components;
+  var format = DA.format;
 
   var HIERARCHY_OPTIONS = [
     { value: 'Parent', label: 'Parent' },
     { value: 'Child', label: 'Child' }
   ];
-
-  /** MM/DD/YYYY -> Date, or null when the text is not a complete date. */
-  function parseDate(text) {
-    var match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(text).trim());
-    if (!match) return null;
-    var date = new Date(Number(match[3]), Number(match[1]) - 1, Number(match[2]));
-    return isNaN(date.getTime()) ? null : date;
-  }
-
-  /**
-   * Whole weeks covered by the profile window, counting both end dates.
-   * Matches the reference: 05/23/2026-08/15/2026 is 13 weeks, and
-   * 05/17/2025-04/04/2026 is 47 weeks.
-   */
-  function weeksBetween(from, to) {
-    var start = parseDate(from);
-    var end = parseDate(to);
-    if (!start || !end || end < start) return null;
-    var days = Math.round((end - start) / 86400000) + 1;
-    return Math.ceil(days / 7);
-  }
 
   DA.pages = DA.pages || {};
 
@@ -62,14 +42,14 @@
     });
 
     var customerLookupSlot = el('div', { className: 'form-field' });
+    var customerLookup;
 
     function renderCustomerLookup() {
-      DA.dom.clear(customerLookupSlot).appendChild(
-        C.ChipInput({
-          label: 'Enter ' + state.hierarchy + '*',
-          multiple: false
-        })
-      );
+      customerLookup = C.ChipInput({
+        label: 'Enter ' + state.hierarchy + '*',
+        multiple: false
+      });
+      DA.dom.clear(customerLookupSlot).appendChild(customerLookup);
     }
 
     /* ---- Shipping profile ----------------------------------------------- */
@@ -77,7 +57,7 @@
     var duration = el('p', { className: 'field__hint' });
 
     function renderDuration() {
-      var weeks = weeksBetween(state.from, state.to);
+      var weeks = format.weeksBetween(state.from, state.to);
       duration.textContent = weeks == null
         ? 'Duration : —'
         : 'Duration : ' + weeks + ' Week' + (weeks === 1 ? '' : 's');
@@ -133,6 +113,44 @@
       ]
     });
 
+    /* ---- Remaining fields ------------------------------------------------ */
+
+    var pqrField = C.Field({
+      label: 'Enter PQR to link to packet (optional)',
+      help: 'A PQR links an existing pricing quote request to this packet.'
+    });
+
+    var oppField = C.ChipInput({
+      label: 'Enter OPP(s) to link to packet (optional)',
+      multiline: true,
+      help: 'Link one or more opportunity records to this packet.',
+      hint: 'Use space bar or enter key to save each entry. Otherwise, paste multiple.',
+      hintAlign: 'end'
+    });
+
+    var referenceField = C.Field({ label: 'Customer Reference Number*' });
+    var customerNameField = C.Field({
+      label: 'Customer Name*',
+      help: 'The customer name is taken from the selected account.'
+    });
+    var descriptionField = C.Field({ label: 'Analyzer Packet Description*' });
+
+    /** What the user captured, ready for the next step. */
+    function collect() {
+      return {
+        hierarchy: state.hierarchy,
+        customerLookup: customerLookup.getValues()[0] || '',
+        pqr: pqrField.input.value,
+        opps: oppField.getValues(),
+        referenceNumber: referenceField.input.value,
+        customerName: customerNameField.input.value,
+        description: descriptionField.input.value,
+        from: state.from,
+        to: state.to,
+        pldFile: state.pldFile
+      };
+    }
+
     /* ---- Composition ----------------------------------------------------- */
 
     renderCustomerLookup();
@@ -146,29 +164,11 @@
       el('div', { className: 'form-grid' }, [
         hierarchyField,
         customerLookupSlot,
-        C.Field({
-          label: 'Enter PQR to link to packet (optional)',
-          help: 'A PQR links an existing pricing quote request to this packet.'
-        }),
-        C.ChipInput({
-          label: 'Enter OPP(s) to link to packet (optional)',
-          multiline: true,
-          help: 'Link one or more opportunity records to this packet.',
-          hint: 'Use space bar or enter key to save each entry. Otherwise, paste multiple.',
-          hintAlign: 'end'
-        }),
-        el('div', { className: 'form-grid__full' }, [
-          C.Field({ label: 'Customer Reference Number*' })
-        ]),
-        el('div', { className: 'form-grid__full' }, [
-          C.Field({
-            label: 'Customer Name*',
-            help: 'The customer name is taken from the selected account.'
-          })
-        ]),
-        el('div', { className: 'form-grid__full' }, [
-          C.Field({ label: 'Analyzer Packet Description*' })
-        ]),
+        pqrField,
+        oppField,
+        el('div', { className: 'form-grid__full' }, [referenceField]),
+        el('div', { className: 'form-grid__full' }, [customerNameField]),
+        el('div', { className: 'form-grid__full' }, [descriptionField]),
         fromField,
         toField,
         el('div', { className: 'form-grid__full' }, [duration])
@@ -190,7 +190,8 @@
         variant: 'primary',
         shape: 'pill',
         icon: DA.icons.chevronRight(14, ''),
-        iconPosition: 'end'
+        iconPosition: 'end',
+        onClick: function () { if (options.onSourceData) options.onSourceData(collect()); }
       })
     ]);
 

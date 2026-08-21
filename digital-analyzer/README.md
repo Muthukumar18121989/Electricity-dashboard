@@ -14,6 +14,7 @@ Open `index.html` directly in a browser; there is no build step.
 | --- | --- | --- |
 | Analyzer Packets (landing after sign-in) | `js/pages/analyzerPacketsPage.js` | Scope switch, search, primary action, 9-column table |
 | Customer Details (New Analyzer Packet, step 1) | `js/pages/customerDetailsPage.js` | Reached from **New Analyzer Packet**; customer lookup, shipping profile, optional PLD upload |
+| Create Scenarios and Analyzer Packet (step 2) | `js/pages/createScenariosPage.js` | Reached from **Source Data**, arriving with the sourcing-in-progress dialog open |
 
 Screens swap below the persistent header via `navigate()` in `js/main.js` —
 the single seam to replace when real routing arrives.
@@ -47,7 +48,8 @@ later without changing the design system.
 `AppHeader` · `Panel` · `Button` / `IconButton` · `Avatar` ·
 `SegmentedControl` · `SearchField` · `StatusBadge` · `DataTable` /
 `RecordLink` · `EmptyState` · `Field` / `SelectField` / `HelpButton` ·
-`ChipInput` · `Toggle` · `Accordion` · `FileDropzone` / `FileItem`
+`ChipInput` · `Toggle` · `Accordion` · `FileDropzone` / `FileItem` ·
+`Modal` · `Alert` · `SummaryPanel` / `Detail` · `Checkbox`
 
 ### Fields
 
@@ -110,6 +112,20 @@ purpose and are each a one-line revert:
 5. **The OPP hint wraps to two lines.** The reference fits it on one at roughly
    8.5px, which is below a legible size; it is set at 10px here.
 
+## Flow
+
+```
+Analyzer Packets ──New Analyzer Packet──▶ Customer Details ──Source Data──▶ Create Scenarios
+       ◀───────────────Back───────────────       ◀──────────Back───────────
+```
+
+`Source Data` builds the packet record through `js/data/newPacket.js` — a demo
+stand-in for the create-packet endpoint. It continues the packet ID sequence
+from the existing list (so the first new packet is 112002, as in the
+reference), stamps the clock for created/modified, and names the signed-in user
+as owner. Any field left blank on the form falls back to the reference customer
+so the walkthrough still reads correctly.
+
 ## Derived values
 
 `Duration : N Weeks` is computed from the shipping profile window as whole
@@ -120,8 +136,12 @@ other business logic is assumed.
 
 ## Not yet wired
 
-`Source Data >` is inert, and the form does no validation — both wait on the
-workflow rules. The help (`?`) buttons carry placeholder text.
+The form does no validation, and on the scenarios screen `Download Scenario
+Summary`, `Create New Scenario` and `Proceed to Analyzer Packet` do nothing
+yet — all wait on the workflow rules. `Proceed to Analyzer Packet` and
+`Expand To Find Bid Details` render disabled, matching the reference and the
+dialog's own explanation that links unlock once sourcing completes. The help
+(`?`) buttons carry placeholder text.
 
 ## Demo data
 

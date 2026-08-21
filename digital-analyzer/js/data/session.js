@@ -8,7 +8,8 @@
 
   DA.session = {
     currentUser: {
-      name: 'Aarav Anand',
+      id: 'CW000012010',
+      name: 'Alagulaxman Alagappan',
       initials: 'AA'
     }
   };

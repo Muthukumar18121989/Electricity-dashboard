@@ -85,6 +85,32 @@
     );
   }
 
+  function download(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M12 4.5v10m0 0-3.8-3.8M12 14.5l3.8-3.8"/>' +
+      '<path ' + STROKE + ' d="M4.5 16v2A1.5 1.5 0 0 0 6 19.5h12A1.5 1.5 0 0 0 19.5 18v-2"/>',
+      { size: size || 18 }
+    );
+  }
+
+  function info(size) {
+    return svg(
+      '<circle cx="12" cy="12" r="9" fill="currentColor"/>' +
+      '<path fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" ' +
+      'd="M12 11v5.2"/>' +
+      '<circle cx="12" cy="7.9" r="1.05" fill="#fff"/>',
+      { size: size || 18 }
+    );
+  }
+
+  function check(size) {
+    return svg(
+      '<path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" ' +
+      'stroke-linejoin="round" d="m6 12.4 4 4 8-8.8"/>',
+      { size: size || 16 }
+    );
+  }
+
   function file(size) {
     return svg(
       '<path ' + STROKE + ' d="M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8.5Z"/>' +
@@ -137,6 +163,9 @@
     closeCircle: closeCircle,
     checkCircle: checkCircle,
     upload: upload,
+    download: download,
+    info: info,
+    check: check,
     file: file,
     plus: plus,
     inbox: inbox,

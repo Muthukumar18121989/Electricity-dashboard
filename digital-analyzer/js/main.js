@@ -20,14 +20,27 @@
     },
     'customer-details': function () {
       return DA.pages.CustomerDetailsPage({
-        onBack: function () { navigate('packets'); }
+        onBack: function () { navigate('packets'); },
+        onSourceData: function (input) {
+          navigate('create-scenarios', {
+            packet: DA.data.buildPacket(input, DA.session.currentUser),
+            showSourcingDialog: true
+          });
+        }
+      });
+    },
+    'create-scenarios': function (params) {
+      return DA.pages.CreateScenariosPage({
+        packet: params.packet,
+        showSourcingDialog: params.showSourcingDialog,
+        onBack: function () { navigate('customer-details'); }
       });
     }
   };
 
-  function navigate(name) {
+  function navigate(name, params) {
     var view = views[name] || views.packets;
-    DA.dom.clear(viewport).appendChild(view());
+    DA.dom.clear(viewport).appendChild(view(params || {}));
     viewport.scrollTop = 0;
     var heading = viewport.querySelector('h1, h2');
     if (heading) heading.setAttribute('tabindex', '-1');

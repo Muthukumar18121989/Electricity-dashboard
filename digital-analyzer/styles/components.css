@@ -348,6 +348,11 @@
   color: var(--color-error);
 }
 
+.badge--pill {
+  border-radius: var(--radius-pill);
+  padding-inline: var(--space-4);
+}
+
 .badge--neutral {
   background-color: var(--color-neutral-badge-subtle);
   border-color: var(--color-border);
@@ -1039,4 +1044,393 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Workflow page title
+   -------------------------------------------------------------------------- */
+.page-title {
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Summary panel  (collapsible record header + detail grid)
+   -------------------------------------------------------------------------- */
+.summary-panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+}
+
+.summary-panel__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  background: none;
+  border: 0;
+  text-align: left;
+}
+
+.summary-panel__header-items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.summary-panel__icon {
+  color: var(--color-text-secondary);
+  transition: transform var(--duration-base) var(--easing-standard);
+}
+
+.summary-panel__header[aria-expanded="true"] .summary-panel__icon {
+  transform: rotate(90deg);
+}
+
+.summary-panel__body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-5);
+  padding: 0 var(--space-5) var(--space-5) var(--space-8);
+}
+
+.summary-panel__body[hidden] {
+  display: none;
+}
+
+.summary-panel__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* Label/value pair — inline on the header row, stacked in the detail grid. */
+.detail {
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-snug);
+}
+
+.detail__label {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.detail__value {
+  color: var(--color-text-secondary);
+}
+
+.detail--inline .detail__value {
+  color: var(--color-text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Alert  (contextual banner with a leading severity bar)
+   -------------------------------------------------------------------------- */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-surface-inverse);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.alert__icon {
+  color: var(--color-text-secondary);
+}
+
+.alert--error {
+  border-left-color: var(--color-error);
+}
+
+.alert--success {
+  border-left-color: var(--color-success);
+}
+
+/* --------------------------------------------------------------------------
+   Checkbox
+   -------------------------------------------------------------------------- */
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.checkbox__input {
+  position: absolute;
+  opacity: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: transparent;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard);
+}
+
+.checkbox__input:checked + .checkbox__box {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.checkbox__input:focus-visible + .checkbox__box {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* --------------------------------------------------------------------------
+   Scenario block
+   -------------------------------------------------------------------------- */
+.scenario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.scenario__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.scenario__name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+}
+
+.scenario__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.scenario__card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.scenario__row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  overflow-x: auto;
+}
+
+.scenario__cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding-right: var(--space-4);
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.scenario__cell:last-of-type {
+  border-right: 0;
+}
+
+.scenario__cell-label {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.scenario__cell-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.scenario__cell--name .scenario__cell-label {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scenario__status {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding-left: var(--space-4);
+}
+
+.scenario__disclosure {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  text-align: left;
+}
+
+.scenario__disclosure[aria-disabled="true"] {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.scenario__disclosure-icon {
+  color: currentColor;
+}
+
+/* --------------------------------------------------------------------------
+   Modal dialog
+   -------------------------------------------------------------------------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.modal__dialog {
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - var(--space-8));
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border-top: 3px solid var(--color-primary);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-md);
+}
+
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+}
+
+.modal__title {
+  flex: 1 1 auto;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  color: var(--color-text-primary);
+}
+
+.modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+}
+
+.modal__close:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.modal__body {
+  padding: 0 var(--space-5) var(--space-6);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Button additions
+   -------------------------------------------------------------------------- */
+.button--outline {
+  background-color: var(--color-surface);
+  border-color: var(--color-text-link);
+  color: var(--color-text-link);
+}
+
+.button--outline:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-text-link-hover);
+  color: var(--color-text-link-hover);
+}
+
+.button--quiet-link {
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-2);
+  background: none;
+  border-color: transparent;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.button--quiet-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* Padded vertical stack inside a panel. */
+.panel__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+/* Actions under a full-width panel rather than the narrow form card. */
+.page-actions--wide {
+  max-width: none;
+}
+
+/*
+ * Panel that sizes to its content instead of filling a fixed frame. The table
+ * screen scrolls inside its panel; the workflow screens scroll the page, so
+ * their panel must neither shrink nor clip.
+ */
+.panel--auto {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.page-title,
+.page-actions {
+  flex: 0 0 auto;
 }
