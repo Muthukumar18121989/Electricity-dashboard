@@ -156,3 +156,11 @@
     --duration-base: 0ms;
   }
 }
+
+/*
+ * The bid table inside a scenario uses a warmer header than the packet list.
+ * Point this at --color-surface-inverse to make every table header identical.
+ */
+:root {
+  --color-surface-inverse-warm: #5a4b45;
+}

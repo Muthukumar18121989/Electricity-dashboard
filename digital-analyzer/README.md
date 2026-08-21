@@ -14,7 +14,7 @@ Open `index.html` directly in a browser; there is no build step.
 | --- | --- | --- |
 | Analyzer Packets (landing after sign-in) | `js/pages/analyzerPacketsPage.js` | Scope switch, search, primary action, 9-column table |
 | Customer Details (New Analyzer Packet, step 1) | `js/pages/customerDetailsPage.js` | Reached from **New Analyzer Packet**; customer lookup, shipping profile, optional PLD upload |
-| Create Scenarios and Analyzer Packet (step 2) | `js/pages/createScenariosPage.js` | Reached from **Source Data**, arriving with the sourcing-in-progress dialog open |
+| Create Scenarios and Analyzer Packet (step 2) | `js/pages/createScenariosPage.js` | Reached from **Source Data**, arriving with the sourcing-in-progress dialog open; the scenario row expands to its sourced bids |
 
 Screens swap below the persistent header via `navigate()` in `js/main.js` —
 the single seam to replace when real routing arrives.
@@ -111,6 +111,12 @@ purpose and are each a one-line revert:
    identical fields above it.
 5. **The OPP hint wraps to two lines.** The reference fits it on one at roughly
    8.5px, which is below a legible size; it is set at 10px here.
+6. **The scenario name truncates on one line** rather than wrapping to two
+   before truncating, as the reference does.
+
+The bid table's header is a warmer dark than the packet list's, matching the
+reference. Point `--color-surface-inverse-warm` at `--color-surface-inverse`
+to make every table header identical.
 
 ## Flow
 
@@ -137,11 +143,14 @@ other business logic is assumed.
 ## Not yet wired
 
 The form does no validation, and on the scenarios screen `Download Scenario
-Summary`, `Create New Scenario` and `Proceed to Analyzer Packet` do nothing
-yet — all wait on the workflow rules. `Proceed to Analyzer Packet` and
-`Expand To Find Bid Details` render disabled, matching the reference and the
-dialog's own explanation that links unlock once sourcing completes. The help
-(`?`) buttons carry placeholder text.
+Summary`, `Create New Scenario`, `Update Description` and `Proceed to Analyzer
+Packet` do nothing yet — all wait on the workflow rules. `Proceed to Analyzer
+Packet` renders disabled, as in the reference. The help (`?`) buttons carry
+placeholder text.
+
+Bid selection is live: each bid's checkbox and the header select-all toggle
+real state on the scenario record. Non-incented revenue has no checkbox — it is
+always included.
 
 ## Demo data
 

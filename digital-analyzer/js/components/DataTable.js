@@ -30,11 +30,12 @@
         'tr',
         {},
         columns.map(function (column) {
+          var custom = column.renderHeader ? column.renderHeader() : null;
           return el('th', {
-            text: column.label,
+            text: custom ? null : column.label,
             attrs: { scope: 'col', 'aria-label': column.ariaLabel || false },
             className: column.headerClassName || ''
-          });
+          }, custom ? [custom] : null);
         })
       )
     ]);
@@ -73,7 +74,10 @@
       });
     }
 
-    var table = el('table', { className: 'data-table' }, [
+    var table = el('table', {
+      className: 'data-table' + (options.embedded ? ' data-table--auto' : '') +
+        (options.headerTone === 'warm' ? ' data-table--warm' : '')
+    }, [
       options.caption
         ? el('caption', { className: 'u-visually-hidden', text: options.caption })
         : null,
@@ -85,7 +89,8 @@
     return el(
       'div',
       {
-        className: 'data-table__viewport scroll-area',
+        className: 'data-table__viewport scroll-area' +
+          (options.embedded ? ' data-table__viewport--auto' : ''),
         attrs: {
           tabindex: '0',
           role: 'region',

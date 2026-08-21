@@ -51,7 +51,17 @@
         title: 'Scenario 0',
         name: (weeks == null ? '' : weeks + ' WEEKS ') + 'UPS SHIPPING PROFILE',
         createdDate: format.formatDate(now),
-        lastModified: format.formatDate(now)
+        lastModified: format.formatDate(now),
+        bids: DA.data.scenarioBids.map(function (bid) {
+          return {
+            bidNumber: bid.bidNumber,
+            bidName: bid.bidName,
+            shippingProfile: bid.shippingProfile,
+            construct: bid.construct,
+            selectable: bid.selectable,
+            selected: bid.selectable
+          };
+        })
       }
     };
   };

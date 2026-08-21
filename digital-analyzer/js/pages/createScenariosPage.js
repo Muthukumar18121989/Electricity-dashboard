@@ -52,8 +52,98 @@
 
     var scenario = packet.scenario || {};
 
-    var scenarioCard = el('div', { className: 'scenario__card' }, [
-      el('div', { className: 'scenario__row' }, [
+    var expanded = false;
+    var scenarioCard = el('div', { className: 'scenario__card' });
+    var bidPanelId = 'scenario-bids';
+
+    var toggle = el('button', {
+      className: 'scenario__toggle',
+      attrs: {
+        type: 'button',
+        'aria-expanded': 'false',
+        'aria-controls': bidPanelId,
+        'aria-label': 'Expand to find bid details'
+      },
+      on: {
+        click: function () {
+          expanded = !expanded;
+          renderScenarioCard();
+          toggle.focus();
+        }
+      }
+    });
+
+    /** Bid rows, with a header checkbox that selects every selectable bid. */
+    function bidTable() {
+      var bids = scenario.bids || [];
+      var table;
+
+      function selectAll(checked) {
+        bids.forEach(function (bid) {
+          if (bid.selectable) bid.selected = checked;
+        });
+        DA.dom.clear(table.parentNode).appendChild(build());
+      }
+
+      function build() {
+        var allSelected = bids.every(function (bid) {
+          return !bid.selectable || bid.selected;
+        });
+
+        table = C.DataTable({
+          caption: 'Bids sourced for ' + scenario.title,
+          embedded: true,
+          headerTone: 'warm',
+          columns: [
+            {
+              key: 'select',
+              label: 'Select',
+              width: '48px',
+              className: 'is-select',
+              headerClassName: 'is-select',
+              renderHeader: function () {
+                return C.Checkbox({
+                  checked: allSelected,
+                  ariaLabel: 'Select all bids',
+                  onChange: selectAll
+                });
+              },
+              render: function (bid) {
+                if (!bid.selectable) return el('span');
+                return C.Checkbox({
+                  checked: bid.selected,
+                  ariaLabel: 'Include bid ' + bid.bidNumber,
+                  onChange: function (checked) { bid.selected = checked; }
+                });
+              }
+            },
+            { key: 'bidNumber', label: 'Bid Number', width: '125px' },
+            // Bid Name is left unsized so it absorbs the remaining width.
+            { key: 'bidName', label: 'Bid Name' },
+            {
+              key: 'shippingProfile',
+              label: 'Shipping Profile',
+              width: '190px',
+              className: 'is-muted'
+            },
+            { key: 'construct', label: 'Construct', width: '130px' }
+          ],
+          rows: bids
+        });
+        return table;
+      }
+
+      return el('div', { className: 'scenario__panel', attrs: { id: bidPanelId } }, [build()]);
+    }
+
+    function renderScenarioCard() {
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      toggle.setAttribute('aria-label', expanded ? 'Collapse bid details' : 'Expand to find bid details');
+      DA.dom.clear(toggle).appendChild(
+        expanded ? DA.icons.chevronUp(16) : DA.icons.chevronDown(16)
+      );
+
+      var cells = [
         el('div', { className: 'scenario__cell' }, [
           el('span', { className: 'scenario__cell-label', text: 'Current' })
         ]),
@@ -68,28 +158,51 @@
           el('span', { className: 'scenario__cell-label', text: 'Created Date' }),
           el('span', { className: 'scenario__cell-value', text: scenario.createdDate })
         ]),
-        el('div', { className: 'scenario__cell' }, [
+        el('div', { className: 'scenario__cell scenario__cell--last' }, [
           el('span', { className: 'scenario__cell-label', text: 'Last Modified' }),
           el('span', { className: 'scenario__cell-value', text: scenario.lastModified })
         ]),
         el('div', { className: 'scenario__status' }, [
           el('span', { className: 'badge badge--neutral badge--pill', text: 'Current' })
         ])
-      ]),
-      // Bid details stay locked while sourcing runs, as the dialog explains.
-      el('button', {
-        className: 'scenario__disclosure',
-        attrs: {
-          type: 'button',
-          'aria-disabled': 'true',
-          'aria-expanded': 'false',
-          title: 'Available once sourcing data completes'
-        }
-      }, [
-        DA.icons.chevronDown(16, 'scenario__disclosure-icon'),
-        el('span', { text: 'Expand To Find Bid Details' })
-      ])
-    ]);
+      ];
+
+      // The chevron rides the summary row when open and the hint line when
+      // closed, matching both reference states.
+      var row = el(
+        'div',
+        { className: 'scenario__row' + (expanded ? '' : ' scenario__row--indented') },
+        (expanded ? [toggle] : []).concat(cells).concat(
+          expanded
+            ? [el('div', { className: 'scenario__update' }, [
+                C.Button({
+                  label: 'Update Description',
+                  variant: 'link',
+                  icon: DA.icons.chevronRight(14, ''),
+                  iconPosition: 'end'
+                })
+              ])]
+            : []
+        )
+      );
+
+      DA.dom.clear(scenarioCard);
+      scenarioCard.appendChild(row);
+      scenarioCard.appendChild(
+        expanded
+          ? bidTable()
+          : el('div', { className: 'scenario__hint-row' }, [
+              toggle,
+              el('span', {
+                className: 'scenario__hint',
+                text: 'Expand To Find Bid Details',
+                on: { click: function () { toggle.click(); } }
+              })
+            ])
+      );
+    }
+
+    renderScenarioCard();
 
     var scenarioBlock = el('section', { className: 'scenario', attrs: { 'aria-label': 'Scenarios' } }, [
       el('div', { className: 'scenario__header' }, [

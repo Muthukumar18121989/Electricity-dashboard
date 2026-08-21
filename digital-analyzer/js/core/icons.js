@@ -47,6 +47,13 @@
     });
   }
 
+  function chevronUp(size, className) {
+    return svg('<path ' + STROKE + ' d="M5.5 15 12 8.5 18.5 15"/>', {
+      size: size || 18,
+      className: className || ''
+    });
+  }
+
   function help(size) {
     return svg(
       '<circle ' + STROKE + ' cx="12" cy="12" r="8.5"/>' +
@@ -158,6 +165,7 @@
     chevronRight: chevronRight,
     chevronLeft: chevronLeft,
     chevronDown: chevronDown,
+    chevronUp: chevronUp,
     help: help,
     close: close,
     closeCircle: closeCircle,
