@@ -49,8 +49,10 @@ later without changing the design system.
 `SegmentedControl` · `SearchField` · `StatusBadge` · `DataTable` /
 `RecordLink` · `EmptyState` · `Field` / `SelectField` / `HelpButton` ·
 `ChipInput` · `Toggle` · `Accordion` · `FileDropzone` / `FileItem` ·
-`Modal` (dialog or right-anchored drawer) · `Alert` · `SummaryPanel` /
-`Detail` · `Checkbox` · `ScenarioBlock`
+`Modal` (dialog, wide dialog, or right-anchored drawer) · `Alert` ·
+`SummaryPanel` / `Detail` · `Checkbox` · `ScenarioBlock` · `Tabs`
+
+Composed dialogs live in `js/dialogs/`.
 
 ### Fields
 
@@ -114,6 +116,13 @@ purpose and are each a one-line revert:
    8.5px, which is below a legible size; it is set at 10px here.
 6. **The scenario name truncates on one line** rather than wrapping to two
    before truncating, as the reference does.
+7. **The source dialog's filters use the product's own field style** — label
+   inside the box — rather than the notched outline the reference draws there,
+   so every select in the app looks the same.
+
+Only the Accessorial view is documented by a screenshot. The Services view
+mirrors it, naming its first column `Service` and dropping the accessorial
+filter; both show `No data available.` until source data is wired up.
 
 The bid table's header is a warmer dark than the packet list's, matching the
 reference. Point `--color-surface-inverse-warm` at `--color-surface-inverse`
@@ -166,6 +175,12 @@ The two kinds of scenario differ, following the reference:
 | Bid table | 5 columns | adds **Account Association** |
 | Shipping profile | plain text, `S0-` | links, `S1-` and up |
 | Extras | — | Simulate New Bid, Save |
+
+A shipping profile link in an editable scenario opens the **source data
+dialog** (`js/dialogs/shippingProfileDialog.js`): the bid's reference source and
+report window over Services and Accessorial views, each with account and
+service filters. Reference Source is the bid number, and the report window is
+the packet's shipping profile in `YYYY-MM-DD`.
 
 Copying rewrites the shipping-profile prefix to the new scenario's index
 (`S0-UPS-PLD-1` becomes `S1-UPS-PLD-1`); profiles without an index prefix, like

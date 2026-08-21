@@ -33,6 +33,7 @@
 
     return {
       title: 'Scenario ' + index,
+      number: index,
       name: name,
       description: description,
       status: 'Analysis In Progress',
@@ -80,6 +81,7 @@
       to: format.toDashDate(input.to),
       scenarios: [{
         title: 'Scenario 0',
+        number: 0,
         name: 'Current',
         description: (weeks == null ? '' : weeks + ' WEEKS ') + 'UPS SHIPPING PROFILE',
         status: 'Current',

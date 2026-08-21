@@ -4,6 +4,9 @@
  * Traps Tab inside the dialog, closes on Escape or a backdrop click, and hands
  * focus back to whatever the caller nominates on close.
  * `variant: 'drawer'` anchors it to the right edge as a full-height side sheet.
+ * `size: 'wide'` widens the dialog; `titleExtras` places chips or metadata
+ * beside the title; `titleRule` draws the brand rule beneath it; `accent`
+ * draws the brand line along the top edge.
  */
 (function (DA) {
   'use strict';
@@ -29,15 +32,20 @@
     var drawer = options.variant === 'drawer';
 
     var dialog = el('div', {
-      className: 'modal__dialog' + (drawer ? ' modal__dialog--drawer' : ''),
+      className: 'modal__dialog' +
+        (drawer ? ' modal__dialog--drawer' : '') +
+        (options.size === 'wide' ? ' modal__dialog--wide' : '') +
+        (options.accent ? ' modal__dialog--accent' : ''),
       attrs: { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId }
     }, [
       el('div', { className: 'modal__header' + (drawer ? ' modal__header--drawer' : '') }, [
-        el('h2', {
-          className: 'modal__title' + (drawer ? ' title-rule' : ''),
-          text: options.title,
-          attrs: { id: titleId }
-        }),
+        el('div', { className: 'modal__title-row' }, [
+          el('h2', {
+            className: 'modal__title' + (drawer || options.titleRule ? ' title-rule' : ''),
+            text: options.title,
+            attrs: { id: titleId }
+          })
+        ].concat(options.titleExtras || [])),
         closeButton
       ]),
       el('div', { className: 'modal__body' }, [

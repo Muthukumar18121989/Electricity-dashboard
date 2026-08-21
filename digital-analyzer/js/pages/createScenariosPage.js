@@ -56,7 +56,7 @@
     function renderScenarios() {
       DA.dom.clear(scenarioList);
       scenarios.forEach(function (scenario) {
-        scenarioList.appendChild(C.ScenarioBlock(scenario));
+        scenarioList.appendChild(C.ScenarioBlock(scenario, { packet: packet }));
       });
     }
 
@@ -173,6 +173,7 @@
     if (options.showSourcingDialog) {
       window.setTimeout(function () {
         C.Modal({
+          accent: true,
           title: 'Sourcing Data is in progress',
           body:
             'Sourcing Data is in progress. The links will be enabled after the ' +

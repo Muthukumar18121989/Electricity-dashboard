@@ -1323,9 +1323,13 @@
   max-height: calc(100vh - var(--space-8));
   overflow-y: auto;
   background-color: var(--color-surface);
-  border-top: 3px solid var(--color-primary);
   border-radius: var(--radius-xs);
   box-shadow: var(--shadow-md);
+}
+
+/* Opt-in top accent, used by the short status dialogs. */
+.modal__dialog--accent {
+  border-top: 3px solid var(--color-primary);
 }
 
 .modal__header {
@@ -1644,4 +1648,150 @@
 
 .link-with-icon > span {
   text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Card  (a bordered surface used inside dialogs and panels)
+   -------------------------------------------------------------------------- */
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.card__body {
+  padding: var(--space-5);
+}
+
+/* --------------------------------------------------------------------------
+   Dialog header extras
+   -------------------------------------------------------------------------- */
+.modal__dialog--wide {
+  max-width: 1040px;
+}
+
+.modal__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.modal__header--drawer .modal__title-row {
+  flex: 0 0 auto;
+}
+
+.modal__title-row .modal__title {
+  flex: 0 0 auto;
+}
+
+/* Label/value pairs strung along the dialog title row. */
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.meta-item__value {
+  color: var(--color-text-link);
+}
+
+.meta-divider {
+  width: 1px;
+  height: 18px;
+  background-color: var(--color-border);
+}
+
+.dialog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.dialog-report {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.dialog-report__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* --------------------------------------------------------------------------
+   Tabs
+   -------------------------------------------------------------------------- */
+.tabs__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tabs__tab {
+  position: relative;
+  padding: var(--space-3) var(--space-1);
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  white-space: nowrap;
+}
+
+.tabs__tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background-color: transparent;
+}
+
+.tabs__tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tabs__tab[aria-selected="true"] {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.tabs__tab[aria-selected="true"]::after {
+  background-color: var(--color-primary);
+}
+
+.tabs__panel {
+  padding-top: var(--space-5);
+}
+
+.tabs__panel:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* --------------------------------------------------------------------------
+   Filter row
+   -------------------------------------------------------------------------- */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.table-empty {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }

@@ -37,6 +37,13 @@
     return pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + '-' + date.getFullYear();
   }
 
+  /** MM-DD-YYYY or MM/DD/YYYY -> YYYY-MM-DD, the report date format. */
+  function toIsoDate(text) {
+    var date = parseDate(text);
+    if (!date) return String(text || '');
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+  }
+
   function formatTimestamp(date) {
     return formatDate(date) + ' ' +
       pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
@@ -46,6 +53,7 @@
     parseDate: parseDate,
     weeksBetween: weeksBetween,
     toDashDate: toDashDate,
+    toIsoDate: toIsoDate,
     formatDate: formatDate,
     formatTimestamp: formatTimestamp
   };

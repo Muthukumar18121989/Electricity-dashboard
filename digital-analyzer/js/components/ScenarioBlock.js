@@ -14,8 +14,9 @@
 
   var uid = 0;
 
-  DA.components.ScenarioBlock = function ScenarioBlock(scenario) {
+  DA.components.ScenarioBlock = function ScenarioBlock(scenario, context) {
     var C = DA.components;
+    context = context || {};
     uid += 1;
     var panelId = 'scenario-panel-' + uid;
     var card = el('div', { className: 'scenario__card' });
@@ -78,7 +79,14 @@
             ? function (bid) {
                 return el('a', {
                   text: bid.shippingProfile,
-                  attrs: { href: '#profile-' + bid.shippingProfile }
+                  attrs: { href: '#profile-' + bid.shippingProfile },
+                  on: {
+                    click: function (event) {
+                      event.preventDefault();
+                      DA.dialogs.ShippingProfileDialog(bid, scenario, context.packet || {})
+                        .open();
+                    }
+                  }
                 });
               }
             : null
