@@ -174,10 +174,16 @@ them.
 
 **Comparison View** is a multi-select dropdown, not a plain select: it lists the
 packet's scenarios as checkboxes with an Apply action, so the report can cover
-one scenario or several. The charge chips beneath the filter row are each
-removable.
+one scenario or several. Applying redraws the comparison band — one row per
+chosen scenario, padded to two, then their difference. The charge chips beneath
+the filter row are each removable.
 
-Tabs: **Summary**, Rate Charts, **Shipping Profiles**, Pricing terms, Other
+Differences come from `scenarioDifferences` rather than being recomputed in the
+UI. The figures above them are rounded for display, so subtracting those lands a
+unit off on Total Disc and Profit; `DA.figures.difference` derives one only for
+a scenario pair with nothing recorded.
+
+Tabs: **Summary**, Rate Charts, **Shipping Profiles**, **Pricing terms**, Other
 terms. Shipping Profiles splits again into Cost, Zone, Weight, Account,
 Accessorial and Service — built so far: **Cost** (27 columns), **Zone** (15),
 **Accessorial** and **Service**. Weight, Account, Rate Charts, Pricing terms
@@ -188,6 +194,14 @@ Every shipping profile view opens with the same five lane keys (Movement, Mode,
 Core Service, Zone, Lane), so those live once in `PROFILE_KEYS` and each view
 supplies only its own figures. Accessorial instead groups a parent charge over
 its detail lines, with the label columns held on the header's dark bar.
+
+**Pricing terms** (`js/views/pricingTerms.js`) splits into Tier Incentives,
+Services, Accessorials and Modifiers. Tier Incentives and the service incentive
+plan are matrices rather than record lists — rows are labels, columns are
+revenue bands or zones — so they use a `.matrix` table with editable cells
+instead of `DataTable`. Services is a three-level tree (region > mode >
+service); each branch and plan is built the first time it opens, so a collapsed
+tree costs nothing. Modifiers has no reference screen yet.
 
 Summary shows one panel per scenario side by side, each a collapsible
 hierarchical table — total, account, sub-total, then service codes. Row labels

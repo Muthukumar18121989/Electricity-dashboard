@@ -135,6 +135,29 @@
     );
   }
 
+  function pencil(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M4.5 19.5h3.2l9-9a2.26 2.26 0 0 0-3.2-3.2l-9 9Z"/>' +
+      '<path ' + STROKE + ' d="m13.7 8.1 2.2 2.2"/>',
+      { size: size || 13 }
+    );
+  }
+
+  function trash(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M4.8 6.5h14.4M9.5 6.5V4.8h5v1.7M6.6 6.5l.8 12.1a1.2 1.2 0 0 0 1.2 1.1h6.8a1.2 1.2 0 0 0 1.2-1.1l.8-12.1"/>',
+      { size: size || 14 }
+    );
+  }
+
+  function save(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M5.5 4.5h10.2L19.5 8.3v11.2H5.5Z"/>' +
+      '<path ' + STROKE + ' d="M8.5 4.5v5h7M8.5 19.5v-5h7v5"/>',
+      { size: size || 15 }
+    );
+  }
+
   function refresh(size) {
     return svg(
       '<path ' + STROKE + ' d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/>' +
@@ -221,6 +244,9 @@
     download: download,
     info: info,
     check: check,
+    pencil: pencil,
+    trash: trash,
+    save: save,
     refresh: refresh,
     filter: filter,
     box: box,

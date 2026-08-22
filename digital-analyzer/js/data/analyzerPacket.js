@@ -8,10 +8,9 @@
 
   DA.data = DA.data || {};
 
-  /** The comparison band above the report tabs. */
-  DA.data.packetSummary = [
-    {
-      scenario: 'Current',
+  /** Figures behind the comparison band, one set per scenario. */
+  DA.data.scenarioFigures = {
+    Current: {
       adv: '17313.0',
       baseFrtDisc: '51.3%',
       totalDisc: '55.9%',
@@ -20,9 +19,35 @@
       or: '0.98',
       profit: '$ 26,111'
     },
-    { scenario: '-' },
-    { scenario: '-' }
-  ];
+    'Scenario 1': {
+      adv: '17340.2',
+      baseFrtDisc: '50.9%',
+      totalDisc: '55.5%',
+      rpp: '$ 12.57',
+      revenue: '$ 1,095,226',
+      or: '0.97',
+      profit: '$ 37,273'
+    }
+  };
+
+  DA.data.comparisonKeys = ['adv', 'baseFrtDisc', 'totalDisc', 'rpp', 'revenue', 'or', 'profit'];
+
+  /**
+   * Differences between two scenarios, keyed "from|to". These come from the
+   * source rather than being recomputed here: the figures above are rounded for
+   * display, so subtracting them lands a unit off on Total Disc and Profit.
+   */
+  DA.data.scenarioDifferences = {
+    'Current|Scenario 1': {
+      adv: '27.2',
+      baseFrtDisc: '-0.4%',
+      totalDisc: '-0.5%',
+      rpp: '$ 0.16',
+      revenue: '$ 20,934',
+      or: '-0.01',
+      profit: '$ 11,161'
+    }
+  };
 
   /** Charge filters currently applied to the report. */
   DA.data.chargeFilters = [
@@ -131,6 +156,89 @@
     { detail: '2nd Day Air A.M.', child: true, totalUnits: '9.0', pctTotalVolume: '0.0%', adu: '1.8', grossRevenue: '$ 139.00', netRevenue: '$ 68.00', discount: '51.3%' },
     { detail: 'Ground Saver > 1 lbs', child: true, totalUnits: '62796.0', pctTotalVolume: '73.1%', adu: '12559.2', grossRevenue: '$ 258,502.00', netRevenue: '$ 77,395.00', discount: '70.1%' },
     { detail: 'Next Day Air Saver', child: true, totalUnits: '68.0', pctTotalVolume: '0.1%', adu: '13.6', grossRevenue: '$ 2,377.00', netRevenue: '$ 547.00', discount: '77.0%' }
+  ];
+
+  /* ---- Pricing terms tab -------------------------------------------------- */
+
+  /** Region > mode > service, as the service incentive plans are grouped. */
+  DA.data.pricingServiceTree = [
+    {
+      label: 'Domestic',
+      children: [
+        {
+          label: 'Air',
+          children: [
+            { label: '2nd Day Air' },
+            { label: '2nd Day Air A.M.' },
+            { label: '3 Day Select' },
+            { label: 'Next Day Air' },
+            { label: 'Next Day Air Early' },
+            { label: 'Next Day Air Saver' }
+          ]
+        },
+        { label: 'Ground', children: [{ label: 'Ground - Package' }] }
+      ]
+    }
+  ];
+
+  /** Zone columns and weight bands behind a service's incentive grid. */
+  DA.data.rateZones = ['2', '3', '4', '5', '6', '7', '8', '44', '45', '46'];
+
+  DA.data.weightBreaks = [
+    { from: '1', to: '5', rate: '46.00%' },
+    { from: '6', to: '10', rate: '47.00%' },
+    { from: '11', to: '20', rate: '50.00%' },
+    { from: '21', to: '30', rate: '52.00%' },
+    { from: '31+', to: '', rate: '54.00%' }
+  ];
+
+  DA.data.flowThroughOptions = [
+    'P/P Pre-Paid',
+    'F/C Freight Collect',
+    'T/P Third Party',
+    'Return Service'
+  ];
+
+  DA.data.tierIncentive = {
+    tier: 'Tier 1',
+    meta: [
+      { label: 'Basis', value: 'Gross Revenue' },
+      { label: 'Rolling Avg', value: '52 Weeks' },
+      { label: 'Modeled', value: '$2,207,875.71' }
+    ],
+    bands: [
+      { modeled: '0.0%', low: '$0.01', high: '$499,999.99', locked: true },
+      { modeled: '22.6%', low: '$500,000.00', high: '$749,999.99' },
+      { modeled: '34.0%', low: '$750,000.00', high: '$999,999.99' },
+      { modeled: '45.3%', low: '$1,000,000.00', high: '$1,249,999.99' },
+      { modeled: '56.6%', low: '$1,250,000.00', high: '$1,499,999.99' },
+      { modeled: '67.9%', low: '$1,500,000.00', high: '$9,999,999,999.99', target: true }
+    ],
+    serviceGroups: [
+      { name: 'UPS N-Next Day Air', variant: '.LTR', codes: 'P/C P/P N/S R/T T/P', rates: ['0.0%', '82.4%', '84.8%', '86.5%', '88.7%', '88.7%'] },
+      { name: 'UPS N-Next Day Air', variant: '.PKG', codes: 'P/C P/P N/S R/T T/P', rates: ['0.0%', '82.3%', '84.7%', '86.5%', '87.4%', '87.7%'] },
+      { name: 'UPS N-Next Day Air Saver', variant: '.LTR', codes: 'P/C P/P T/P', rates: ['0.0%', '82.0%', '84.6%', '86.0%', '86.1%', '86.4%'] }
+    ]
+  };
+
+  /** Accessorial charges under pricing terms, grouped by charge family. */
+  DA.data.pricingAccessorials = [
+    { group: 'Ground Saver', detail: 'Ground Saver < 1 lbs', totalUnits: '1495.0', pctTotalVolume: '1.7%', adu: '299.0', grossRevenue: '$ 5,253.00', netRevenue: '$ 1,868.00', discount: '64.4%', rate: '$ 3.51' },
+    { group: 'Other Charges', detail: 'Third Party Billing Service', expandable: true, totalUnits: '92.0', pctTotalVolume: '0.1%', adu: '18.4', grossRevenue: '$ 576.00', netRevenue: '$ 114.00', discount: '80.2%', rate: '$ 6.27' },
+    { group: 'Other Pickup and Delivery', detail: 'Saturday Air Processing Fee (Saturday)', expandable: true, totalUnits: '26.0', pctTotalVolume: '0.0%', adu: '5.2', grossRevenue: '$ 416.00', netRevenue: '$ 208.00', discount: '50.0%', rate: '$ 16.00' },
+    { group: 'Saturday Delivery', detail: 'Saturday Delivery', expandable: true, totalUnits: '5.0', pctTotalVolume: '0.0%', adu: '1.0', grossRevenue: '$ 80.00', netRevenue: '$ 40.00', discount: '50.0%', rate: '$ 16.00' },
+    { group: 'Return Labels', detail: 'Electronic Label', expandable: true, totalUnits: '360.0', pctTotalVolume: '0.4%', adu: '72.0', grossRevenue: '$ 414.00', netRevenue: '$ 205.00', discount: '50.4%', rate: '$ 1.15' },
+    { group: 'Return Labels', detail: 'Print Return Label', expandable: true, totalUnits: '39.0', pctTotalVolume: '0.0%', adu: '7.8', grossRevenue: '$ 45.00', netRevenue: '$ 22.00', discount: '50.4%', rate: '$ 1.15' },
+    { group: 'Additional Handling', detail: 'Additional Handling Length', expandable: true, totalUnits: '3.0', pctTotalVolume: '0.0%', adu: '0.6', grossRevenue: '$ 107.00', netRevenue: '$ 80.00', discount: '25.0%', rate: '$ 35.67' },
+    { group: 'Additional Handling', detail: 'Additional Handling Length + Girth', expandable: true, totalUnits: '18.0', pctTotalVolume: '0.0%', adu: '3.6', grossRevenue: '$ 685.00', netRevenue: '$ 514.00', discount: '25.0%', rate: '$ 38.04' },
+    { group: 'Additional Handling', detail: 'Additional Handling Packaging', expandable: true, totalUnits: '15.0', pctTotalVolume: '0.0%', adu: '3.0', grossRevenue: '$ 477.00', netRevenue: '$ 358.00', discount: '25.0%', rate: '$ 31.78' },
+    { group: 'Additional Handling', detail: 'Additional Handling Weight', expandable: true, totalUnits: '45.0', pctTotalVolume: '0.1%', adu: '9.0', grossRevenue: '$ 2,430.00', netRevenue: '$ 1,822.00', discount: '25.0%', rate: '$ 53.99' },
+    { group: 'Additional Handling', detail: 'Additional Handling Width', expandable: true, totalUnits: '1.0', pctTotalVolume: '0.0%', adu: '0.2', grossRevenue: '$ 38.00', netRevenue: '$ 29.00', discount: '25.0%', rate: '$ 38.50' },
+    { group: 'Delivery Area', detail: 'Delivery Area Commercial', expandable: true, totalUnits: '729.0', pctTotalVolume: '0.8%', adu: '145.8', grossRevenue: '$ 3,280.00', netRevenue: '$ 1,312.00', discount: '60.0%', rate: '$ 4.50' },
+    { group: 'Delivery Area', detail: 'Delivery Area Commercial Extended', expanded: true, totalUnits: '175.0', pctTotalVolume: '0.2%', adu: '35.0', grossRevenue: '$ 997.00', netRevenue: '$ 399.00', discount: '60.0%', rate: '$ 5.70' },
+    { detail: 'Next Day Air', child: true, totalUnits: '9.0', pctTotalVolume: '0.0%', adu: '1.8', grossRevenue: '$ 51.00', netRevenue: '$ 21.00', discount: '60.0%', rate: '$ 5.70' },
+    { detail: 'Ground', child: true, totalUnits: '164.0', pctTotalVolume: '0.2%', adu: '32.8', grossRevenue: '$ 935.00', netRevenue: '$ 374.00', discount: '60.0%', rate: '$ 5.70' },
+    { detail: '2nd Day Air', child: true, totalUnits: '1.0', pctTotalVolume: '0.0%', adu: '0.2', grossRevenue: '$ 6.00', netRevenue: '$ 2.00', discount: '60.0%', rate: '$ 5.70' }
   ];
 
   /** Rows behind Shipping Profiles > Service. */

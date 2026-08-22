@@ -63,15 +63,24 @@
 
     /* ---- Comparison selector --------------------------------------------- */
 
+    // The baseline scenario is always part of a comparison; the rest are opt-in.
+    var chosen = scenarios.slice(0, 1).map(function (scenario) { return scenario.name; });
+    var pending = chosen.slice();
+    var comparisonBand = el('section', { className: 'panel panel--auto' });
+
     var comparisonSelector = C.Dropdown({
       label: 'Comparison View',
       content: [
-        el('div', {}, scenarios.map(function (scenario, index) {
+        el('div', {}, scenarios.map(function (scenario) {
           return el('div', { className: 'dropdown__option' }, [
             C.Checkbox({
-              // The baseline scenario is always part of a comparison.
-              checked: index === 0,
-              label: scenario.name
+              checked: pending.indexOf(scenario.name) !== -1,
+              label: scenario.name,
+              onChange: function (checked) {
+                var at = pending.indexOf(scenario.name);
+                if (checked && at === -1) pending.push(scenario.name);
+                if (!checked && at !== -1) pending.splice(at, 1);
+              }
             })
           ]);
         })),
@@ -80,11 +89,75 @@
             label: 'Apply',
             variant: 'outline',
             shape: 'pill',
-            onClick: function () { comparisonSelector.close(); }
+            onClick: function () {
+              chosen = pending.slice();
+              renderComparisonBand();
+              comparisonSelector.close();
+            }
           })
         ])
       ]
     });
+
+    /**
+     * One row per chosen scenario, padded to two, then their difference.
+     * A recorded difference is used when there is one; otherwise it is derived
+     * from the figures shown, which can land a unit off where those are
+     * rounded for display.
+     */
+    function comparisonRows() {
+      var figures = DA.data.scenarioFigures;
+      var keys = DA.data.comparisonKeys;
+      var picked = scenarios.filter(function (scenario) {
+        return chosen.indexOf(scenario.name) !== -1;
+      });
+
+      var rows = picked.map(function (scenario) {
+        var values = figures[scenario.name] || {};
+        var row = { scenario: scenario.name };
+        keys.forEach(function (key) { row[key] = values[key]; });
+        return row;
+      });
+
+      while (rows.length < 2) rows.push({ scenario: '-' });
+
+      var difference = { scenario: '', difference: true };
+      if (picked.length === 2) {
+        var a = figures[picked[0].name] || {};
+        var b = figures[picked[1].name] || {};
+        var recorded = DA.data.scenarioDifferences[picked[0].name + '|' + picked[1].name];
+        keys.forEach(function (key) {
+          difference[key] = recorded ? recorded[key] : DA.figures.difference(a[key], b[key]);
+        });
+      }
+      rows.push(difference);
+      return rows;
+    }
+
+    function renderComparisonBand() {
+      DA.dom.clear(comparisonBand).appendChild(
+        C.DataTable({
+          caption: 'Scenario comparison',
+          embedded: true,
+          headerTone: 'plain',
+          dividers: true,
+          rowClassName: function (row) { return row.difference ? 'is-difference' : ''; },
+          columns: [
+            { key: 'scenario', label: 'Scenario', width: '150px' },
+            numeric('adv', 'ADV'),
+            numeric('baseFrtDisc', 'Base Frt Disc'),
+            numeric('totalDisc', 'Total Disc'),
+            numeric('rpp', 'RPP'),
+            numeric('revenue', 'Revenue', { width: '150px' }),
+            numeric('or', 'OR'),
+            numeric('profit', 'Profit', { width: '130px' })
+          ],
+          rows: comparisonRows()
+        })
+      );
+    }
+
+    renderComparisonBand();
 
     /* ---- Summary tab ------------------------------------------------------ */
 
@@ -205,6 +278,43 @@
             tinted: true,
             columns: profileKeyColumns().concat(options.columns),
             rows: options.rows
+          })
+        ])
+      ]);
+    }
+
+    /** Filter row for the pricing term views. */
+    function pricingFilters() {
+      return el('div', { className: 'card' }, [
+        el('div', { className: 'view-filters' }, [
+          el('div', { className: 'view-filters__field' }, [
+            C.SelectField({
+              label: 'Choose Scenario',
+              value: scenarios[scenarios.length - 1] && scenarios[scenarios.length - 1].name,
+              options: scenarios.map(function (scenario) {
+                return { value: scenario.name, label: scenario.name };
+              })
+            })
+          ]),
+          el('div', { className: 'view-filters__field' }, [
+            C.SelectField({
+              label: 'Choose Bid',
+              value: customer + ' MAIN',
+              options: [{ value: customer + ' MAIN', label: customer + ' MAIN' }]
+            })
+          ]),
+          C.Button({
+            label: 'Reset',
+            variant: 'ghost',
+            icon: DA.icons.refresh(15),
+            iconPosition: 'end'
+          }),
+          el('span', { className: 'view-filters__divider' }),
+          C.Button({
+            label: 'Define Bid Structure',
+            variant: 'ghost',
+            icon: DA.icons.chevronRight(14, ''),
+            iconPosition: 'end'
           })
         ])
       ]);
@@ -430,25 +540,7 @@
         ])
       ]),
       C.FilterChips({ ariaLabel: 'Applied charge filters', values: DA.data.chargeFilters }),
-      el('section', { className: 'panel panel--auto' }, [
-        C.DataTable({
-          caption: 'Scenario comparison',
-          embedded: true,
-          headerTone: 'plain',
-          dividers: true,
-          columns: [
-            { key: 'scenario', label: 'Scenario', width: '150px' },
-            numeric('adv', 'ADV'),
-            numeric('baseFrtDisc', 'Base Frt Disc'),
-            numeric('totalDisc', 'Total Disc'),
-            numeric('rpp', 'RPP'),
-            numeric('revenue', 'Revenue', { width: '150px' }),
-            numeric('or', 'OR'),
-            numeric('profit', 'Profit', { width: '130px' })
-          ],
-          rows: DA.data.packetSummary
-        })
-      ]),
+      comparisonBand,
       el('div', { className: 'tabs--page' }, [
         C.Tabs({
           ariaLabel: 'Report sections',
@@ -463,7 +555,18 @@
                 el('div', { className: 'panel__content' }, [shippingProfilesView()])
               ]);
             } },
-            { id: 'pricing-terms', label: 'Pricing terms', render: emptyView('Pricing Term') },
+            { id: 'pricing-terms', label: 'Pricing terms', render: function () {
+              return el('section', { className: 'panel panel--auto' }, [
+                el('div', { className: 'panel__content' }, [
+                  DA.views.PricingTerms({
+                    packet: packet,
+                    numeric: numeric,
+                    filters: pricingFilters,
+                    emptyView: emptyView
+                  })
+                ])
+              ]);
+            } },
             { id: 'other-terms', label: 'Other terms', render: emptyView('Other Term') }
           ]
         })

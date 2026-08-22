@@ -2363,3 +2363,248 @@
 .is-rowhead-dark .row-expander:hover {
   color: var(--color-brand-gold);
 }
+
+/* --------------------------------------------------------------------------
+   Pricing terms
+   -------------------------------------------------------------------------- */
+.plan-tree {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+/* Nested plan levels: each is a card, each level steps in. */
+.accordion--plan > .accordion__trigger {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.accordion--plan > .accordion__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-4) var(--space-5);
+}
+
+.plan-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-2);
+}
+
+.plan-detail__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.field-row__label {
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.field-row .form-field {
+  width: 180px;
+}
+
+/* --------------------------------------------------------------------------
+   Rate grid  (weight breaks by zone)
+   -------------------------------------------------------------------------- */
+.rate-grid__caption {
+  padding: var(--space-3);
+  background-color: var(--color-surface-inverse-warm);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--font-size-sm);
+}
+
+.matrix th,
+.matrix td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+  white-space: nowrap;
+}
+
+.matrix thead th {
+  background-color: var(--color-surface-inverse-warm);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.matrix__rowhead {
+  background-color: var(--color-surface-muted-strong);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.matrix__cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix tbody tr:nth-child(even) td {
+  background-color: var(--color-surface-sunken);
+}
+
+.matrix tbody tr:nth-child(even) .matrix__rowhead {
+  background-color: var(--color-surface-muted-strong);
+}
+
+.cell-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.icon-action {
+  display: inline-flex;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-text-muted);
+}
+
+.icon-action:hover {
+  color: var(--color-text-link);
+}
+
+.icon-action--danger {
+  color: var(--color-error);
+}
+
+.icon-action--danger:hover {
+  color: #8c1d17;
+}
+
+.grid-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+}
+
+.grid-scroll {
+  max-height: 260px;
+  overflow: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Tier incentive grid
+   -------------------------------------------------------------------------- */
+.tier-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.tier-header__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
+.tier-header__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: var(--space-4);
+  border-right: 1px solid var(--color-border);
+}
+
+.tier-header__label {
+  font-size: var(--font-size-3xs);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.tier-header__value {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+}
+
+.tier-header__actions {
+  margin-left: auto;
+}
+
+.matrix__label {
+  background-color: var(--color-surface-inverse-warm);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+}
+
+.matrix__label-sub {
+  display: block;
+  font-size: var(--font-size-3xs);
+  font-weight: var(--font-weight-regular);
+  opacity: 0.85;
+}
+
+.matrix__section td {
+  background-color: var(--color-surface);
+  font-weight: var(--font-weight-medium);
+}
+
+/* The tier being aimed at, held apart from the bands leading to it. */
+.matrix .is-target {
+  background-color: #f6e3dd;
+  color: var(--color-text-primary);
+}
+
+.matrix tbody tr:nth-child(even) .is-target {
+  background-color: #f6e3dd;
+}
+
+.matrix__target-flag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-4);
+  background-color: #f0cfc6;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+/* The difference between two compared scenarios, set apart from the figures
+   it was derived from. */
+.data-table tr.is-difference td {
+  color: var(--color-primary);
+}

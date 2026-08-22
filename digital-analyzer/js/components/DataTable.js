@@ -55,7 +55,7 @@
         body.appendChild(
           el(
             'tr',
-            {},
+            { className: options.rowClassName ? options.rowClassName(row) : '' },
             columns.map(function (column) {
               var content = column.render ? column.render(row) : row[column.key];
               var isNode = content instanceof Node;
