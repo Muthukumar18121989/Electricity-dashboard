@@ -179,10 +179,15 @@ removable.
 
 Tabs: **Summary**, Rate Charts, **Shipping Profiles**, Pricing terms, Other
 terms. Shipping Profiles splits again into Cost, Zone, Weight, Account,
-Accessorial and Service. Documented by reference screens so far: Summary,
-Shipping Profiles > Cost, and Shipping Profiles > Service. Every other tab
-renders the product's own `No data available.` state rather than invented
-content.
+Accessorial and Service — built so far: **Cost** (27 columns), **Zone** (15),
+**Accessorial** and **Service**. Weight, Account, Rate Charts, Pricing terms
+and Other terms render the product's own `No data available.` state rather
+than invented content.
+
+Every shipping profile view opens with the same five lane keys (Movement, Mode,
+Core Service, Zone, Lane), so those live once in `PROFILE_KEYS` and each view
+supplies only its own figures. Accessorial instead groups a parent charge over
+its detail lines, with the label columns held on the header's dark bar.
 
 Summary shows one panel per scenario side by side, each a collapsible
 hierarchical table — total, account, sub-total, then service codes. Row labels

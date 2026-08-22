@@ -169,43 +169,147 @@
       ]);
     }
 
-    function costView() {
+    /** The lane keys every shipping profile view opens with. */
+    function profileKeyColumns() {
+      return [
+        { key: 'movement', label: 'Movement', width: '110px', className: 'is-rowhead' },
+        { key: 'mode', label: 'Mode', width: '115px', className: 'is-rowhead' },
+        {
+          key: 'service',
+          label: 'Core Service',
+          width: '150px',
+          className: 'is-rowhead',
+          render: function (row) {
+            return el('button', {
+              className: 'row-expander',
+              attrs: { type: 'button', 'aria-label': 'Open ' + row.service }
+            }, [
+              el('span', { className: 'row-expander__label', text: row.service }),
+              DA.icons.chevronRight(14, 'row-expander__icon')
+            ]);
+          }
+        },
+        numeric('zone', 'Zone', { width: '85px' }),
+        numeric('lane', 'Lane', { width: '85px' })
+      ];
+    }
+
+    function profileTable(options) {
       return el('div', {}, [
         profileFilters(),
         el('div', { className: 'card' }, [
           C.DataTable({
-            caption: 'Shipping profile cost',
+            caption: options.caption,
+            embedded: true,
+            headerTone: 'warm',
+            tinted: true,
+            columns: profileKeyColumns().concat(options.columns),
+            rows: options.rows
+          })
+        ])
+      ]);
+    }
+
+    function costView() {
+      return profileTable({
+        caption: 'Shipping profile cost',
+        rows: DA.data.shippingProfileCost,
+        columns: [
+          numeric('volume', 'Volume', { link: true, width: '110px' }),
+          numeric('adv', 'ADV', { link: true, width: '100px' }),
+          numeric('pps', 'PPS', { link: true, width: '80px' }),
+          numeric('weightPiece', 'Weight/ Piece', { link: true, width: '120px' }),
+          numeric('avgCube', 'Avg Cube', { link: true, width: '105px' }),
+          numeric('avgCubeFactor', 'Avg Cube Factor', { link: true, width: '145px' }),
+          numeric('puDens', 'PU Dens', { link: true, width: '105px' }),
+          numeric('dlDens', 'DL Dens', { link: true, width: '105px' }),
+          numeric('pu', 'PU', { link: true, width: '90px' }),
+          numeric('ls', 'LS', { link: true, width: '90px' }),
+          numeric('cs', 'CS', { link: true, width: '90px' }),
+          numeric('ar', 'AR', { link: true, width: '90px' }),
+          numeric('jf', 'JF', { link: true, width: '95px' }),
+          numeric('gf', 'GF', { link: true, width: '90px' }),
+          numeric('br', 'BR', { link: true, width: '90px' }),
+          numeric('pd', 'PD', { link: true, width: '90px' }),
+          numeric('dl', 'DL', { link: true, width: '90px' }),
+          numeric('no', 'NO', { link: true, width: '90px' }),
+          numeric('oth', 'OTH', { link: true, width: '95px' }),
+          numeric('totalFreightCost', 'Total Freight Cost', { link: true, width: '160px' }),
+          numeric('costAdj', 'Cost Adj', { width: '105px' }),
+          numeric('newCost', 'New Cost', { link: true, width: '115px' })
+        ]
+      });
+    }
+
+    function zoneView() {
+      return profileTable({
+        caption: 'Shipping profile zones',
+        rows: DA.data.shippingProfileZone,
+        columns: [
+          numeric('volume', 'Volume', { link: true, width: '110px' }),
+          numeric('adv', 'ADV', { link: true, width: '100px' }),
+          numeric('pps', 'PPS', { link: true, width: '80px' }),
+          numeric('weightPiece', 'Weight/Piece', { link: true, width: '125px' }),
+          numeric('freightGrossSpent', 'Freight Gross Spent', { link: true, width: '175px' }),
+          numeric('freightDiscount', 'Freight Discount (%)', { link: true, width: '175px' }),
+          numeric('freightRpp', 'Freight RPP', { link: true, width: '125px' }),
+          numeric('freightNetSpent', 'Freight Net Spent', { link: true, width: '165px' }),
+          numeric('freightProfit', 'Freight Profit ($)', { link: true, width: '160px' }),
+          numeric('freightOr', 'Freight OR', { link: true, width: '120px' })
+        ]
+      });
+    }
+
+    function accessorialView() {
+      function labelColumn(key, label, options) {
+        options = options || {};
+        return {
+          key: key,
+          label: label,
+          width: options.width || '135px',
+          className: 'is-rowhead-dark',
+          render: function (row) {
+            if (!row[key]) return el('span');
+            if (!options.expander) {
+              return el('span', { className: 'tree-cell__label', text: row[key] });
+            }
+            return el('span', {
+              className: 'tree-cell' + (row.child ? ' tree-cell--indent' : '')
+            }, [
+              row.expandable
+                ? el('button', {
+                    className: 'row-expander',
+                    attrs: { type: 'button', 'aria-label': 'Collapse ' + row[key] }
+                  }, [
+                    el('span', { className: 'row-expander__label', text: row[key] }),
+                    DA.icons.chevronDown(14, 'row-expander__icon')
+                  ])
+                : el('span', { className: 'tree-cell__label', text: row[key] })
+            ]);
+          }
+        };
+      }
+
+      return el('div', {}, [
+        profileFilters(),
+        el('div', { className: 'card' }, [
+          C.DataTable({
+            caption: 'Accessorial charges',
             embedded: true,
             headerTone: 'warm',
             tinted: true,
             columns: [
-              { key: 'movement', label: 'Movement', width: '110px', className: 'is-rowhead' },
-              { key: 'mode', label: 'Mode', width: '110px', className: 'is-rowhead' },
-              {
-                key: 'service',
-                label: 'Core Service',
-                width: '150px',
-                className: 'is-rowhead',
-                render: function (row) {
-                  return el('button', {
-                    className: 'row-expander',
-                    attrs: { type: 'button', 'aria-label': 'Open ' + row.service }
-                  }, [
-                    el('span', { className: 'row-expander__label', text: row.service }),
-                    DA.icons.chevronRight(14, 'row-expander__icon')
-                  ]);
-                }
-              },
-              numeric('zone', 'Zone', { width: '85px' }),
-              numeric('lane', 'Lane', { width: '85px' }),
-              numeric('volume', 'Volume', { link: true, width: '110px' }),
-              numeric('adv', 'ADV', { link: true, width: '100px' }),
-              numeric('pps', 'PPS', { link: true, width: '80px' }),
-              numeric('weightPiece', 'Weight/ Piece', { link: true, width: '120px' }),
-              numeric('avgCube', 'Avg Cube', { link: true, width: '105px' }),
-              numeric('avgCubeFactor', 'Avg Cube Factor', { link: true, width: '140px' })
+              labelColumn('type', 'Accessorial Type'),
+              labelColumn('group', 'Group'),
+              labelColumn('detail', 'Detail', { width: '215px', expander: true }),
+              numeric('totalUnits', 'Total Units', { link: true, width: '120px' }),
+              numeric('pctTotalVolume', '% Total Volume', { link: true, width: '150px' }),
+              numeric('adu', 'ADU', { link: true, width: '110px' }),
+              numeric('grossRevenue', 'Gross Revenue', { link: true, width: '150px' }),
+              numeric('netRevenue', 'Net Revenue', { link: true, width: '145px' }),
+              numeric('discount', 'Discount', { link: true, width: '110px' })
             ],
-            rows: DA.data.shippingProfileCost
+            rows: DA.data.shippingProfileAccessorial
           })
         ])
       ]);
@@ -261,10 +365,10 @@
           value: 'cost',
           items: [
             { id: 'cost', label: 'Cost', render: costView },
-            { id: 'zone', label: 'Zone', render: emptyView('Zone') },
+            { id: 'zone', label: 'Zone', render: zoneView },
             { id: 'weight', label: 'Weight', render: emptyView('Weight') },
             { id: 'account', label: 'Account', render: emptyView('Account') },
-            { id: 'accessorial', label: 'Accessorial', render: emptyView('Accessorial') },
+            { id: 'accessorial', label: 'Accessorial', render: accessorialView },
             { id: 'service', label: 'Service', render: serviceView }
           ]
         })

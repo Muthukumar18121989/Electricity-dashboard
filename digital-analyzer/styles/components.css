@@ -2341,3 +2341,25 @@
 .tabs--boxed > .tabs > .tabs__panel {
   padding-top: var(--space-5);
 }
+
+/* Label columns held on the header's own dark bar, as the accessorial
+   breakdown draws them. */
+.data-table td.is-rowhead-dark {
+  background-color: var(--color-surface-inverse-warm);
+  color: var(--color-text-inverse);
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.data-table tbody tr:hover td.is-rowhead-dark {
+  background-color: var(--color-surface-inverse-warm);
+}
+
+.is-rowhead-dark .row-expander,
+.is-rowhead-dark .row-expander__icon,
+.is-rowhead-dark .tree-cell__toggle {
+  color: inherit;
+}
+
+.is-rowhead-dark .row-expander:hover {
+  color: var(--color-brand-gold);
+}
