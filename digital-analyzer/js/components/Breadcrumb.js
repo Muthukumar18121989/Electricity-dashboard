@@ -9,7 +9,9 @@
   DA.components = DA.components || {};
 
   DA.components.Breadcrumb = function Breadcrumb(options) {
-    var items = (options || {}).items || [];
+    options = options || {};
+    var items = options.items || [];
+    var separator = options.separator || '>';
 
     return el('nav', { className: 'breadcrumb', attrs: { 'aria-label': 'Breadcrumb' } }, [
       el('ol', { className: 'breadcrumb__list' }, items.map(function (item, index) {
@@ -22,7 +24,11 @@
                 attrs: { href: item.href || '#' },
                 on: { click: function (e) { e.preventDefault(); item.onClick(); } }
               }),
-          last ? null : el('span', { className: 'breadcrumb__separator', text: '>', attrs: { 'aria-hidden': 'true' } })
+          last ? null : el('span', {
+            className: 'breadcrumb__separator',
+            text: separator,
+            attrs: { 'aria-hidden': 'true' }
+          })
         ]);
       }))
     ]);

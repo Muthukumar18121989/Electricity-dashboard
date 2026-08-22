@@ -135,6 +135,20 @@
     );
   }
 
+  function refresh(size) {
+    return svg(
+      '<path ' + STROKE + ' d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/>' +
+      '<path ' + STROKE + ' d="M19.8 4.2v4.3h-4.3"/>',
+      { size: size || 15 }
+    );
+  }
+
+  function filter(size) {
+    return svg('<path ' + STROKE + ' d="M4.5 5.5h15l-5.9 6.8v5.4l-3.2 1.8v-7.2Z"/>', {
+      size: size || 16
+    });
+  }
+
   function settings(size) {
     return svg(
       '<circle ' + STROKE + ' cx="12" cy="12" r="2.9"/>' +
@@ -207,6 +221,8 @@
     download: download,
     info: info,
     check: check,
+    refresh: refresh,
+    filter: filter,
     box: box,
     boxOff: boxOff,
     settings: settings,

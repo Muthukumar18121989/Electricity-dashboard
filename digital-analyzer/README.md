@@ -16,6 +16,7 @@ Open `index.html` directly in a browser; there is no build step.
 | Customer Details (New Analyzer Packet, step 1) | `js/pages/customerDetailsPage.js` | Reached from **New Analyzer Packet**; customer lookup, shipping profile, optional PLD upload |
 | Create Scenarios and Analyzer Packet (step 2) | `js/pages/createScenariosPage.js` | Reached from **Source Data**, arriving with the sourcing-in-progress dialog open; the scenario row expands to its sourced bids |
 | Account Association | `js/pages/accountAssociationPage.js` | Reached from **Accounts** on a bid in an editable scenario; parent > subparent > account tree |
+| Analyzer Packet | `js/pages/analyzerPacketPage.js` | Reached from **Proceed to Analyzer Packet**; scenario comparison band over two levels of report tabs |
 
 Screens swap below the header via `navigate()` in `js/main.js` — the single
 seam to replace when real routing arrives. The header re-renders per screen, so
@@ -127,6 +128,10 @@ purpose and are each a one-line revert:
 
 8. **The count tiles use line icons** from the product's own icon set rather
    than the reference's 3D isometric illustrations.
+9. **Numeric column headers are right-aligned** over their right-aligned
+   figures; the reference centres them.
+10. **Drill-down figures are not underlined**, so number columns stay quiet.
+    Record links — shipping profiles, accounts — still are.
 
 Only the Accessorial view is documented by a screenshot. The Services view
 mirrors it, naming its first column `Service` and dropping the accessorial
@@ -164,6 +169,19 @@ The counts above the tree are derived from the accounts in it, using each
 account's `type` and `associated` flags — the tiles cannot drift from the rows.
 Checkboxes cascade: the parent and subparent rows select every account beneath
 them.
+
+## Analyzer packet
+
+Two levels of tabs: the report section (Analyzer, Pricing Terms, Other Terms,
+Adjustments, Rate Charts) and, within Analyzer, the view (Comparisons,
+Services, Charges, Accounts, Cost Details, Zones, Weight & Cube). Only
+**Analyzer > Services** is documented by a reference screen; every other tab
+renders the product's own `No data available.` table state rather than invented
+content.
+
+`DataTable` grew three variants for this screen: a `plain` header for the
+comparison band (weight instead of a dark bar), `dividers` for its column
+rules, and `tinted` for the services table body.
 
 ## Not yet wired
 

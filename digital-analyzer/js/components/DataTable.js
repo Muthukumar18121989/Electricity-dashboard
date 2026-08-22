@@ -75,8 +75,11 @@
     }
 
     var table = el('table', {
-      className: 'data-table' + (options.embedded ? ' data-table--auto' : '') +
-        (options.headerTone === 'warm' ? ' data-table--warm' : '')
+      className: 'data-table' +
+        (options.embedded ? ' data-table--auto' : '') +
+        (options.headerTone ? ' data-table--' + options.headerTone : '') +
+        (options.dividers ? ' data-table--dividers' : '') +
+        (options.tinted ? ' data-table--tinted' : '')
     }, [
       options.caption
         ? el('caption', { className: 'u-visually-hidden', text: options.caption })

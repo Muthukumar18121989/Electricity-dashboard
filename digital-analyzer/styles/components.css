@@ -1647,7 +1647,7 @@
 
 /* Links inside a bid table are underlined, so they read as links against
    dense tabular text. The icon in an icon link stays undecorated. */
-.data-table--warm td a:not(.link-with-icon) {
+.data-table--warm td:not(.is-numeric) a:not(.link-with-icon) {
   text-decoration: underline;
 }
 
@@ -2040,4 +2040,148 @@
   gap: var(--space-1);
   font-size: var(--font-size-xs);
   color: var(--color-text-link);
+}
+
+/* --------------------------------------------------------------------------
+   DataTable — plain header, column dividers, tinted body
+   -------------------------------------------------------------------------- */
+
+/* Summary tables read as part of their card: no dark bar, just weight. */
+.data-table--plain thead th {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table--dividers thead th + th,
+.data-table--dividers tbody td + td {
+  border-left: 1px solid var(--color-border-subtle);
+}
+
+.data-table--tinted tbody td {
+  background-color: var(--color-surface-muted);
+}
+
+.data-table--tinted tbody tr:hover td {
+  background-color: var(--color-surface-hover);
+}
+
+/* Numeric columns align right, headers included, so digits stack. */
+.data-table .is-end,
+.data-table th.is-end {
+  text-align: right;
+}
+
+/* Row label that opens the row's detail. */
+.row-expander {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-text-primary);
+  font-size: inherit;
+  text-align: left;
+}
+
+.row-expander__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-expander__icon {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+}
+
+.row-expander:hover {
+  color: var(--color-text-link);
+}
+
+/* --------------------------------------------------------------------------
+   Record header  (title, identity chips, and the record's key numbers)
+   -------------------------------------------------------------------------- */
+.record-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.record-header__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+}
+
+.title-rule--full::after {
+  width: 100%;
+}
+
+.record-header__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Toolbar of filter controls above a report
+   -------------------------------------------------------------------------- */
+.report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-5) 0;
+}
+
+.report-filters__field {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.report-filters__actions {
+  margin-left: auto;
+}
+
+.select-field--bare .field__input {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.view-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.view-filters__field {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.view-filters__divider {
+  width: 1px;
+  align-self: stretch;
+  background-color: var(--color-border);
+}
+
+.tabs--page .tabs__list {
+  gap: var(--space-6);
+  border-bottom: 0;
+}
+
+.tabs--page > .tabs__panel {
+  padding-top: var(--space-4);
 }

@@ -98,10 +98,16 @@
     var chevron = DA.icons.chevronDown(18, 'select-field__chevron');
 
     var wrapper = el('div', { className: 'form-field' }, [
-      el('div', { className: 'field select-field' }, [
+      el('div', {
+        className: 'field select-field' + (options.hideLabel ? ' select-field--bare' : '')
+      }, [
         el('div', { className: 'field__control' }, [
           select,
-          el('label', { className: 'field__label', text: options.label, attrs: { for: id } }),
+          el('label', {
+            className: options.hideLabel ? 'u-visually-hidden' : 'field__label',
+            text: options.label,
+            attrs: { for: id }
+          }),
           chevron
         ]),
         options.help ? DA.components.HelpButton(options.help) : null

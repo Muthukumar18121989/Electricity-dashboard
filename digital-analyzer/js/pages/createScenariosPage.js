@@ -163,7 +163,7 @@
         shape: 'pill',
         icon: DA.icons.chevronRight(14, ''),
         iconPosition: 'end',
-        disabled: true
+        onClick: function () { if (options.onProceed) options.onProceed(); }
       })
     ]);
 

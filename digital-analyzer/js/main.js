@@ -46,7 +46,21 @@
           onBack: function () { navigate('customer-details'); },
           onOpenAccounts: function (bid, scenario) {
             navigate('account-association', { bid: bid, scenario: scenario });
-          }
+          },
+          onProceed: function () { navigate('analyzer-packet'); }
+        });
+      }
+    },
+
+    'analyzer-packet': {
+      header: function () {
+        return { backLink: { label: 'Back to My Analyzers', onClick: function () { navigate('packets'); } } };
+      },
+      render: function () {
+        return DA.pages.AnalyzerPacketPage({
+          packet: current.packet,
+          onBack: function () { navigate('create-scenarios'); },
+          onExit: function () { navigate('packets'); }
         });
       }
     },
