@@ -56,7 +56,7 @@ later without changing the design system.
 `ChipInput` · `Toggle` · `Accordion` · `FileDropzone` / `FileItem` ·
 `Modal` (dialog, wide dialog, or right-anchored drawer) · `Alert` ·
 `SummaryPanel` / `Detail` · `Checkbox` · `ScenarioBlock` · `Tabs` ·
-`StatRow` · `Breadcrumb`
+`StatRow` · `Breadcrumb` · `Dropdown` · `FilterChips`
 
 Composed dialogs live in `js/dialogs/`.
 
@@ -172,16 +172,27 @@ them.
 
 ## Analyzer packet
 
-Two levels of tabs: the report section (Analyzer, Pricing Terms, Other Terms,
-Adjustments, Rate Charts) and, within Analyzer, the view (Comparisons,
-Services, Charges, Accounts, Cost Details, Zones, Weight & Cube). Only
-**Analyzer > Services** is documented by a reference screen; every other tab
-renders the product's own `No data available.` table state rather than invented
+**Comparison View** is a multi-select dropdown, not a plain select: it lists the
+packet's scenarios as checkboxes with an Apply action, so the report can cover
+one scenario or several. The charge chips beneath the filter row are each
+removable.
+
+Tabs: **Summary**, Rate Charts, **Shipping Profiles**, Pricing terms, Other
+terms. Shipping Profiles splits again into Cost, Zone, Weight, Account,
+Accessorial and Service. Documented by reference screens so far: Summary,
+Shipping Profiles > Cost, and Shipping Profiles > Service. Every other tab
+renders the product's own `No data available.` state rather than invented
 content.
 
-`DataTable` grew three variants for this screen: a `plain` header for the
+Summary shows one panel per scenario side by side, each a collapsible
+hierarchical table — total, account, sub-total, then service codes. Row labels
+carry the packet's customer, so `{customer} MAIN` resolves to the record you
+are actually looking at.
+
+`DataTable` grew four variants for this screen: a `plain` header for the
 comparison band (weight instead of a dark bar), `dividers` for its column
-rules, and `tinted` for the services table body.
+rules, `tinted` for report table bodies, and an `is-rowhead` column class that
+holds label columns visually apart from the figures beside them.
 
 ## Not yet wired
 

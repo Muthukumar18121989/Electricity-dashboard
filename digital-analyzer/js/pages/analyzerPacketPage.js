@@ -1,10 +1,12 @@
 /**
  * Analyzer Packet — the report built from the packet's scenarios.
  *
- * Reached from "Proceed to Analyzer Packet". Two levels of tabs: the report
- * section (Analyzer, Pricing Terms, …) and, within Analyzer, the view
- * (Comparisons, Services, …). Only Analyzer > Services is documented by a
- * reference screen; the rest render the product's empty table state.
+ * Reached from "Proceed to Analyzer Packet". The comparison selector chooses
+ * which scenarios the report covers; the tabs below split it into Summary,
+ * Rate Charts, Shipping Profiles, Pricing terms and Other terms.
+ *
+ * Summary and Shipping Profiles > Cost/Service are documented by reference
+ * screens; the remaining tabs render the product's empty table state.
  */
 (function (DA) {
   'use strict';
@@ -52,52 +54,169 @@
   DA.pages.AnalyzerPacketPage = function AnalyzerPacketPage(options) {
     options = options || {};
     var packet = options.packet || {};
+    var customer = packet.customerName || '-';
+    var scenarios = packet.scenarios || [];
 
-    /* ---- Scenario comparison band ---------------------------------------- */
+    function withCustomer(text) {
+      return String(text).replace('{customer}', customer);
+    }
 
-    var summary = el('section', { className: 'panel panel--auto' }, [
-      C.DataTable({
-        caption: 'Scenario comparison',
-        embedded: true,
-        headerTone: 'plain',
-        dividers: true,
-        columns: [
-          { key: 'scenario', label: 'Scenario', width: '160px' },
-          numeric('adv', 'ADV'),
-          numeric('baseDisc', 'Base Disc'),
-          numeric('totalDisc', 'Total Disc'),
-          numeric('rpp', 'RPP'),
-          numeric('annualRevenue', 'Annual Revenue', { width: '150px' }),
-          numeric('or', 'OR'),
-          numeric('annualProfit', 'Annual Profit', { width: '150px' })
-        ],
-        rows: DA.data.packetSummary
-      })
-    ]);
+    /* ---- Comparison selector --------------------------------------------- */
 
-    /* ---- Analyzer > Services --------------------------------------------- */
+    var comparisonSelector = C.Dropdown({
+      label: 'Comparison View',
+      content: [
+        el('div', {}, scenarios.map(function (scenario, index) {
+          return el('div', { className: 'dropdown__option' }, [
+            C.Checkbox({
+              // The baseline scenario is always part of a comparison.
+              checked: index === 0,
+              label: scenario.name
+            })
+          ]);
+        })),
+        el('div', { className: 'dropdown__footer' }, [
+          C.Button({
+            label: 'Apply',
+            variant: 'outline',
+            shape: 'pill',
+            onClick: function () { comparisonSelector.close(); }
+          })
+        ])
+      ]
+    });
 
-    function servicesView() {
-      return el('div', {}, [
+    /* ---- Summary tab ------------------------------------------------------ */
+
+    function summaryColumns() {
+      return [
+        {
+          key: 'label',
+          label: 'Cost Basis: FA',
+          width: '150px',
+          className: 'is-rowhead',
+          render: function (row) {
+            return el('span', {
+              className: 'tree-cell' + (row.level ? ' tree-cell--indent' : '')
+            }, [
+              row.expandable
+                ? el('button', {
+                    className: 'tree-cell__toggle',
+                    attrs: { type: 'button', 'aria-label': 'Expand ' + withCustomer(row.label) }
+                  }, [DA.icons.chevronDown(14)])
+                : null,
+              el('span', { className: 'tree-cell__label', text: withCustomer(row.label) })
+            ]);
+          }
+        },
+        numeric('adv', 'ADV', { width: '110px' }),
+        numeric('baseFrt', 'Base Frt', { width: '105px' }),
+        numeric('totalDisc', 'Total Disc', { width: '110px' }),
+        numeric('rpp', 'RPP', { width: '110px' }),
+        numeric('annRev', 'Ann Rev', { width: '140px' })
+      ];
+    }
+
+    function summaryView() {
+      var trees = DA.data.packetSummaryTrees;
+
+      return el('div', { className: 'comparison-grid' },
+        scenarios.map(function (scenario) {
+          var rows = trees[scenario.name] || trees.Current;
+          return C.Accordion({
+            title: scenario.name,
+            expanded: true,
+            className: 'accordion--filled',
+            content: [
+              C.DataTable({
+                caption: scenario.name + ' summary',
+                embedded: true,
+                headerTone: 'warm',
+                columns: summaryColumns(),
+                rows: rows
+              })
+            ]
+          });
+        })
+      );
+    }
+
+    /* ---- Shipping Profiles tab -------------------------------------------- */
+
+    function profileFilters() {
+      return el('div', { className: 'card' }, [
         el('div', { className: 'view-filters' }, [
           el('div', { className: 'view-filters__field' }, [
             C.SelectField({
               label: 'Choose Scenario',
-              value: 'Current',
-              options: (packet.scenarios || []).map(function (scenario) {
+              value: scenarios[0] && scenarios[0].name,
+              options: scenarios.map(function (scenario) {
                 return { value: scenario.name, label: scenario.name };
               })
             })
           ]),
           el('span', { className: 'view-filters__divider' }),
           el('div', { className: 'view-filters__field' }, [
-            C.SelectField({ label: 'Choose Bid', value: 'All', options: [{ value: 'All', label: 'All' }] })
+            C.SelectField({
+              label: 'Account',
+              hideLabel: true,
+              value: customer + ' MAIN',
+              options: [{ value: customer + ' MAIN', label: customer + ' MAIN' }]
+            })
           ]),
           C.Button({ label: 'Filters', variant: 'ghost', icon: DA.icons.filter(16) })
-        ]),
+        ])
+      ]);
+    }
+
+    function costView() {
+      return el('div', {}, [
+        profileFilters(),
         el('div', { className: 'card' }, [
           C.DataTable({
-            caption: 'Services',
+            caption: 'Shipping profile cost',
+            embedded: true,
+            headerTone: 'warm',
+            tinted: true,
+            columns: [
+              { key: 'movement', label: 'Movement', width: '110px', className: 'is-rowhead' },
+              { key: 'mode', label: 'Mode', width: '110px', className: 'is-rowhead' },
+              {
+                key: 'service',
+                label: 'Core Service',
+                width: '150px',
+                className: 'is-rowhead',
+                render: function (row) {
+                  return el('button', {
+                    className: 'row-expander',
+                    attrs: { type: 'button', 'aria-label': 'Open ' + row.service }
+                  }, [
+                    el('span', { className: 'row-expander__label', text: row.service }),
+                    DA.icons.chevronRight(14, 'row-expander__icon')
+                  ]);
+                }
+              },
+              numeric('zone', 'Zone', { width: '85px' }),
+              numeric('lane', 'Lane', { width: '85px' }),
+              numeric('volume', 'Volume', { link: true, width: '110px' }),
+              numeric('adv', 'ADV', { link: true, width: '100px' }),
+              numeric('pps', 'PPS', { link: true, width: '80px' }),
+              numeric('weightPiece', 'Weight/ Piece', { link: true, width: '120px' }),
+              numeric('avgCube', 'Avg Cube', { link: true, width: '105px' }),
+              numeric('avgCubeFactor', 'Avg Cube Factor', { link: true, width: '140px' })
+            ],
+            rows: DA.data.shippingProfileCost
+          })
+        ])
+      ]);
+    }
+
+    function serviceView() {
+      return el('div', {}, [
+        profileFilters(),
+        el('div', { className: 'card' }, [
+          C.DataTable({
+            caption: 'Shipping profile services',
             embedded: true,
             headerTone: 'warm',
             tinted: true,
@@ -106,6 +225,7 @@
                 key: 'service',
                 label: 'Core Service',
                 width: '240px',
+                className: 'is-rowhead',
                 render: function (row) {
                   return el('button', {
                     className: 'row-expander',
@@ -134,21 +254,22 @@
       ]);
     }
 
-    var analyzerView = el('div', { className: 'panel panel--auto' }, [
-      C.Tabs({
-        ariaLabel: 'Analyzer views',
-        value: 'services',
-        items: [
-          { id: 'comparisons', label: 'Comparisons', render: emptyView('Comparison') },
-          { id: 'services', label: 'Services', render: servicesView },
-          { id: 'charges', label: 'Charges', render: emptyView('Charge') },
-          { id: 'accounts', label: 'Accounts', render: emptyView('Account') },
-          { id: 'cost-details', label: 'Cost Details', render: emptyView('Cost Detail') },
-          { id: 'zones', label: 'Zones', render: emptyView('Zone') },
-          { id: 'weight-cube', label: 'Weight & Cube', render: emptyView('Weight & Cube') }
-        ]
-      })
-    ]);
+    function shippingProfilesView() {
+      return el('div', { className: 'tabs--boxed' }, [
+        C.Tabs({
+          ariaLabel: 'Shipping profile views',
+          value: 'cost',
+          items: [
+            { id: 'cost', label: 'Cost', render: costView },
+            { id: 'zone', label: 'Zone', render: emptyView('Zone') },
+            { id: 'weight', label: 'Weight', render: emptyView('Weight') },
+            { id: 'account', label: 'Account', render: emptyView('Account') },
+            { id: 'accessorial', label: 'Accessorial', render: emptyView('Accessorial') },
+            { id: 'service', label: 'Service', render: serviceView }
+          ]
+        })
+      ]);
+    }
 
     /* ---- Composition ------------------------------------------------------ */
 
@@ -163,7 +284,7 @@
       el('div', { className: 'record-header' }, [
         el('h2', {
           className: 'record-header__title title-rule title-rule--full',
-          text: packet.customerName || '-'
+          text: customer
         }),
         el('div', { className: 'record-header__meta' }, [
           el('span', { className: 'badge badge--success', text: packet.industry || '-' }),
@@ -183,14 +304,7 @@
         })
       ]),
       el('div', { className: 'report-filters' }, [
-        el('div', { className: 'report-filters__field' }, [
-          C.SelectField({
-            label: 'View',
-            hideLabel: true,
-            value: 'Comparison View',
-            options: [{ value: 'Comparison View', label: 'Comparison View' }]
-          })
-        ]),
+        el('div', { className: 'report-filters__field' }, [comparisonSelector]),
         el('div', { className: 'report-filters__field' }, [
           C.SelectField({ label: 'Revenue Basis', value: 'All', options: [{ value: 'All', label: 'All' }] })
         ]),
@@ -211,17 +325,42 @@
           })
         ])
       ]),
-      summary,
+      C.FilterChips({ ariaLabel: 'Applied charge filters', values: DA.data.chargeFilters }),
+      el('section', { className: 'panel panel--auto' }, [
+        C.DataTable({
+          caption: 'Scenario comparison',
+          embedded: true,
+          headerTone: 'plain',
+          dividers: true,
+          columns: [
+            { key: 'scenario', label: 'Scenario', width: '150px' },
+            numeric('adv', 'ADV'),
+            numeric('baseFrtDisc', 'Base Frt Disc'),
+            numeric('totalDisc', 'Total Disc'),
+            numeric('rpp', 'RPP'),
+            numeric('revenue', 'Revenue', { width: '150px' }),
+            numeric('or', 'OR'),
+            numeric('profit', 'Profit', { width: '130px' })
+          ],
+          rows: DA.data.packetSummary
+        })
+      ]),
       el('div', { className: 'tabs--page' }, [
         C.Tabs({
           ariaLabel: 'Report sections',
-          value: 'analyzer',
+          value: 'summary',
           items: [
-            { id: 'analyzer', label: 'Analyzer', render: function () { return analyzerView; } },
-            { id: 'pricing-terms', label: 'Pricing Terms', render: emptyView('Pricing Term') },
-            { id: 'other-terms', label: 'Other Terms', render: emptyView('Other Term') },
-            { id: 'adjustments', label: 'Adjustments', render: emptyView('Adjustment') },
-            { id: 'rate-charts', label: 'Rate Charts', render: emptyView('Rate Chart') }
+            { id: 'summary', label: 'Summary', render: function () {
+              return el('section', { className: 'panel panel--auto' }, [summaryView()]);
+            } },
+            { id: 'rate-charts', label: 'Rate Charts', render: emptyView('Rate Chart') },
+            { id: 'shipping-profiles', label: 'Shipping Profiles', render: function () {
+              return el('section', { className: 'panel panel--auto' }, [
+                el('div', { className: 'panel__content' }, [shippingProfilesView()])
+              ]);
+            } },
+            { id: 'pricing-terms', label: 'Pricing terms', render: emptyView('Pricing Term') },
+            { id: 'other-terms', label: 'Other terms', render: emptyView('Other Term') }
           ]
         })
       ])

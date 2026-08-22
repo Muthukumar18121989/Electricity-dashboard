@@ -42,6 +42,8 @@
       el('span', { text: options.title })
     ]);
 
-    return el('div', { className: 'accordion' }, [trigger, panel]);
+    return el('div', {
+      className: 'accordion' + (options.className ? ' ' + options.className : '')
+    }, [trigger, panel]);
   };
 })(window.DA);
