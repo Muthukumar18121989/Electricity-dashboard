@@ -61,6 +61,17 @@
       return String(text).replace('{customer}', customer);
     }
 
+    function asOptions(values) {
+      return values.map(function (value) { return { value: value, label: value }; });
+    }
+
+    /** The customer's accounts, as the bid and account pickers list them. */
+    function accountOptions() {
+      return DA.data.filterOptions.accountSuffix.map(function (suffix) {
+        return { value: customer + ' ' + suffix, label: customer + ' ' + suffix };
+      });
+    }
+
     /* ---- Comparison selector --------------------------------------------- */
 
     // The baseline scenario is always part of a comparison; the rest are opt-in.
@@ -168,19 +179,7 @@
           label: 'Cost Basis: FA',
           width: '150px',
           className: 'is-rowhead',
-          render: function (row) {
-            return el('span', {
-              className: 'tree-cell' + (row.level ? ' tree-cell--indent' : '')
-            }, [
-              row.expandable
-                ? el('button', {
-                    className: 'tree-cell__toggle',
-                    attrs: { type: 'button', 'aria-label': 'Expand ' + withCustomer(row.label) }
-                  }, [DA.icons.chevronDown(14)])
-                : null,
-              el('span', { className: 'tree-cell__label', text: withCustomer(row.label) })
-            ]);
-          }
+          render: function (row) { return withCustomer(row.label); }
         },
         numeric('adv', 'ADV', { width: '110px' }),
         numeric('baseFrt', 'Base Frt', { width: '105px' }),
@@ -205,6 +204,8 @@
                 caption: scenario.name + ' summary',
                 embedded: true,
                 headerTone: 'warm',
+                expandKey: 'label',
+                getChildren: function (row) { return row.children; },
                 columns: summaryColumns(),
                 rows: rows
               })
@@ -234,7 +235,7 @@
               label: 'Account',
               hideLabel: true,
               value: customer + ' MAIN',
-              options: [{ value: customer + ' MAIN', label: customer + ' MAIN' }]
+              options: accountOptions()
             })
           ]),
           C.Button({ label: 'Filters', variant: 'ghost', icon: DA.icons.filter(16) })
@@ -247,21 +248,7 @@
       return [
         { key: 'movement', label: 'Movement', width: '110px', className: 'is-rowhead' },
         { key: 'mode', label: 'Mode', width: '115px', className: 'is-rowhead' },
-        {
-          key: 'service',
-          label: 'Core Service',
-          width: '150px',
-          className: 'is-rowhead',
-          render: function (row) {
-            return el('button', {
-              className: 'row-expander',
-              attrs: { type: 'button', 'aria-label': 'Open ' + row.service }
-            }, [
-              el('span', { className: 'row-expander__label', text: row.service }),
-              DA.icons.chevronRight(14, 'row-expander__icon')
-            ]);
-          }
-        },
+        { key: 'service', label: 'Core Service', width: '175px', className: 'is-rowhead' },
         numeric('zone', 'Zone', { width: '85px' }),
         numeric('lane', 'Lane', { width: '85px' })
       ];
@@ -276,6 +263,12 @@
             embedded: true,
             headerTone: 'warm',
             tinted: true,
+            expandKey: 'service',
+            // A lane opens onto the zones it shipped in.
+            getChildren: function (row) {
+              if (row.zone !== '-') return null;
+              return DA.data.zoneBreakdown(row, 'service', DA.data.additive[options.additive]);
+            },
             columns: profileKeyColumns().concat(options.columns),
             rows: options.rows
           })
@@ -300,7 +293,7 @@
             C.SelectField({
               label: 'Choose Bid',
               value: customer + ' MAIN',
-              options: [{ value: customer + ' MAIN', label: customer + ' MAIN' }]
+              options: accountOptions()
             })
           ]),
           C.Button({
@@ -323,6 +316,7 @@
     function costView() {
       return profileTable({
         caption: 'Shipping profile cost',
+        additive: 'cost',
         rows: DA.data.shippingProfileCost,
         columns: [
           numeric('volume', 'Volume', { link: true, width: '110px' }),
@@ -354,6 +348,7 @@
     function zoneView() {
       return profileTable({
         caption: 'Shipping profile zones',
+        additive: 'zone',
         rows: DA.data.shippingProfileZone,
         columns: [
           numeric('volume', 'Volume', { link: true, width: '110px' }),
@@ -371,33 +366,8 @@
     }
 
     function accessorialView() {
-      function labelColumn(key, label, options) {
-        options = options || {};
-        return {
-          key: key,
-          label: label,
-          width: options.width || '135px',
-          className: 'is-rowhead-dark',
-          render: function (row) {
-            if (!row[key]) return el('span');
-            if (!options.expander) {
-              return el('span', { className: 'tree-cell__label', text: row[key] });
-            }
-            return el('span', {
-              className: 'tree-cell' + (row.child ? ' tree-cell--indent' : '')
-            }, [
-              row.expandable
-                ? el('button', {
-                    className: 'row-expander',
-                    attrs: { type: 'button', 'aria-label': 'Collapse ' + row[key] }
-                  }, [
-                    el('span', { className: 'row-expander__label', text: row[key] }),
-                    DA.icons.chevronDown(14, 'row-expander__icon')
-                  ])
-                : el('span', { className: 'tree-cell__label', text: row[key] })
-            ]);
-          }
-        };
+      function labelColumn(key, label, width) {
+        return { key: key, label: label, width: width || '135px', className: 'is-rowhead-dark' };
       }
 
       return el('div', {}, [
@@ -408,10 +378,12 @@
             embedded: true,
             headerTone: 'warm',
             tinted: true,
+            expandKey: 'detail',
+            getChildren: function (row) { return row.children; },
             columns: [
               labelColumn('type', 'Accessorial Type'),
               labelColumn('group', 'Group'),
-              labelColumn('detail', 'Detail', { width: '215px', expander: true }),
+              labelColumn('detail', 'Detail', '235px'),
               numeric('totalUnits', 'Total Units', { link: true, width: '120px' }),
               numeric('pctTotalVolume', '% Total Volume', { link: true, width: '150px' }),
               numeric('adu', 'ADU', { link: true, width: '110px' }),
@@ -434,22 +406,12 @@
             embedded: true,
             headerTone: 'warm',
             tinted: true,
+            expandKey: 'service',
+            getChildren: function (row) {
+              return DA.data.zoneBreakdown(row, 'service', DA.data.additive.service);
+            },
             columns: [
-              {
-                key: 'service',
-                label: 'Core Service',
-                width: '240px',
-                className: 'is-rowhead',
-                render: function (row) {
-                  return el('button', {
-                    className: 'row-expander',
-                    attrs: { type: 'button', 'aria-label': 'Open ' + row.service }
-                  }, [
-                    el('span', { className: 'row-expander__label', text: row.service }),
-                    DA.icons.chevronRight(14, 'row-expander__icon')
-                  ]);
-                }
-              },
+              { key: 'service', label: 'Core Service', width: '250px', className: 'is-rowhead' },
               numeric('volume', 'Volume', { link: true, width: '95px' }),
               numeric('adv', 'ADV', { link: true, width: '80px' }),
               numeric('avgZone', 'Avg Zone', { link: true, width: '100px' }),
@@ -520,13 +482,13 @@
       el('div', { className: 'report-filters' }, [
         el('div', { className: 'report-filters__field' }, [comparisonSelector]),
         el('div', { className: 'report-filters__field' }, [
-          C.SelectField({ label: 'Revenue Basis', value: 'All', options: [{ value: 'All', label: 'All' }] })
+          C.SelectField({ label: 'Revenue Basis', value: 'All', options: asOptions(DA.data.filterOptions.revenueBasis) })
         ]),
         el('div', { className: 'report-filters__field' }, [
           C.SelectField({
             label: 'Cost Basis',
             value: 'Fully Allocated Cost',
-            options: [{ value: 'Fully Allocated Cost', label: 'Fully Allocated Cost' }]
+            options: asOptions(DA.data.filterOptions.costBasis)
           })
         ]),
         el('div', { className: 'report-filters__actions' }, [

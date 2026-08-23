@@ -12,10 +12,16 @@
 
   DA.dialogs = DA.dialogs || {};
 
-  var ALL = [{ value: 'All', label: 'All' }];
-
+  /** Each filter opens onto the choices recorded for it, defaulting to All. */
   function filterSelect(label) {
-    return DA.components.SelectField({ label: label, value: 'All', options: ALL });
+    var key = label.toLowerCase();
+    var values = DA.data.filterOptions[key] ||
+      ['All'].concat(DA.data.filterOptions.accountSuffix);
+    return DA.components.SelectField({
+      label: label,
+      value: 'All',
+      options: values.map(function (value) { return { value: value, label: value }; })
+    });
   }
 
   /**

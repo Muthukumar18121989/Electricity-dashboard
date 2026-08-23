@@ -2608,3 +2608,54 @@
 .data-table tr.is-difference td {
   color: var(--color-primary);
 }
+
+/* --------------------------------------------------------------------------
+   Expandable table rows
+   -------------------------------------------------------------------------- */
+.expand-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.expand-cell > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+}
+
+.row-toggle:hover {
+  color: var(--color-text-link);
+}
+
+/* Keep the toggle legible on the dark label columns. */
+.is-rowhead-dark .row-toggle {
+  color: inherit;
+}
+
+.is-rowhead-dark .row-toggle:hover {
+  color: var(--color-brand-gold);
+}
+
+.data-table tbody tr.is-child-row td {
+  color: var(--color-text-secondary);
+}
+
+.data-table tbody tr.is-child-row .is-rowhead-dark {
+  color: var(--color-text-inverse);
+}

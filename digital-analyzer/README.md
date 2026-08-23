@@ -213,6 +213,18 @@ comparison band (weight instead of a dark bar), `dividers` for its column
 rules, `tinted` for report table bodies, and an `is-rowhead` column class that
 holds label columns visually apart from the figures beside them.
 
+## Expandable rows
+
+`DataTable` owns row expansion: give it `expandKey` (the column whose cell
+carries the toggle) and `getChildren(row)`, and children appear beneath their
+parent, indented, until it is closed. A row flagged `expanded` starts open.
+
+Where the references break a row out, those children are recorded. Everywhere
+else they are derived in `js/data/breakdowns.js` — additive figures split by
+share, rates carried down unchanged — so a breakdown always adds back up to the
+row above it. Expanding a lane shows the zones it shipped in; expanding an
+accessorial shows the services that incurred it.
+
 ## Not yet wired
 
 On the account screen, `Search`, `Attach Account` and `Review Changes` are

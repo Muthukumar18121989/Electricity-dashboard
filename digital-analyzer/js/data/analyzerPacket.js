@@ -32,6 +32,16 @@
 
   DA.data.comparisonKeys = ['adv', 'baseFrtDisc', 'totalDisc', 'rpp', 'revenue', 'or', 'profit'];
 
+  /** Sample choices for the report filters. */
+  DA.data.filterOptions = {
+    revenueBasis: ['All', 'Freight Only', 'Accessorial Only', 'Net Revenue'],
+    costBasis: ['Fully Allocated Cost', 'Marginal Cost', 'Direct Cost'],
+    incentiveMethod: ['Weight Break', 'Flat Incentive', 'Zone Based', 'Minimum Charge'],
+    service: ['All', 'Next Day Air', 'Next Day Air Saver', '2nd Day Air', 'Ground', 'Ground Saver'],
+    accessorial: ['All', 'Fuel Surcharge', 'Delivery Area', 'Additional Handling', 'Return Labels'],
+    accountSuffix: ['MAIN', 'EAST', 'WEST']
+  };
+
   /**
    * Differences between two scenarios, keyed "from|to". These come from the
    * source rather than being recomputed here: the figures above are rounded for
@@ -62,41 +72,48 @@
   /* ---- Summary tab -------------------------------------------------------- */
 
   var SERVICE_ROWS = [
-    { label: '1DA', level: 1, adv: '130.4', baseFrt: '49.1%', totalDisc: '52.2%', rpp: '$ 99.76', annRev: '$ 65,024' },
-    { label: '1DM', level: 1, adv: '3.0', baseFrt: '0.0%', totalDisc: '0.8%', rpp: '$ 326.80', annRev: '$ 4,902' },
-    { label: '1DP', level: 1, adv: '13.6', baseFrt: '61.7%', totalDisc: '63.8%', rpp: '$ 72.58', annRev: '$ 4,933' },
-    { label: '2DA', level: 1, adv: '43.6', baseFrt: '56.7%', totalDisc: '58.8%', rpp: '$ 28.21', annRev: '$ 6,148' },
-    { label: '2DM', level: 1, adv: '1.8', baseFrt: '18.9%', totalDisc: '24.9%', rpp: '$ 68.63', annRev: '$ 617' },
-    { label: '3DS', level: 1, adv: '71.4', baseFrt: '59.4%', totalDisc: '60.9%', rpp: '$ 31.36', annRev: '$ 11,193' },
-    { label: 'GND', level: 1, adv: '4190.6', baseFrt: '58.0%', totalDisc: '61.9%', rpp: '$ 13.33', annRev: '$ 279,251' },
-    { label: 'USG', level: 1, adv: '12559.2', baseFrt: '48.9%', totalDisc: '53.6%', rpp: '$ 10.92', annRev: '$ 685,610' },
-    { label: 'USL', level: 1, adv: '299.4', baseFrt: '37.8%', totalDisc: '44.8%', rpp: '$ 11.06', annRev: '$ 16,614' }
+    { label: '1DA', adv: '130.4', baseFrt: '49.1%', totalDisc: '52.2%', rpp: '$ 99.76', annRev: '$ 65,024' },
+    { label: '1DM', adv: '3.0', baseFrt: '0.0%', totalDisc: '0.8%', rpp: '$ 326.80', annRev: '$ 4,902' },
+    { label: '1DP', adv: '13.6', baseFrt: '61.7%', totalDisc: '63.8%', rpp: '$ 72.58', annRev: '$ 4,933' },
+    { label: '2DA', adv: '43.6', baseFrt: '56.7%', totalDisc: '58.8%', rpp: '$ 28.21', annRev: '$ 6,148' },
+    { label: '2DM', adv: '1.8', baseFrt: '18.9%', totalDisc: '24.9%', rpp: '$ 68.63', annRev: '$ 617' },
+    { label: '3DS', adv: '71.4', baseFrt: '59.4%', totalDisc: '60.9%', rpp: '$ 31.36', annRev: '$ 11,193' },
+    { label: 'GND', adv: '4190.6', baseFrt: '58.0%', totalDisc: '61.9%', rpp: '$ 13.33', annRev: '$ 279,251' },
+    { label: 'USG', adv: '12559.2', baseFrt: '48.9%', totalDisc: '53.6%', rpp: '$ 10.92', annRev: '$ 685,610' },
+    { label: 'USL', adv: '299.4', baseFrt: '37.8%', totalDisc: '44.8%', rpp: '$ 11.06', annRev: '$ 16,614' }
   ];
 
   function accountBlock() {
-    return [
-      {
-        label: '{customer} MAIN',
-        level: 0,
-        expandable: true,
-        adv: '17313.0',
-        baseFrt: '51.3%',
-        totalDisc: '56.0%',
-        rpp: '$ 12.41',
-        annRev: '$ 1,074,292'
-      },
-      { label: 'Sub total', level: 1, adv: '-', baseFrt: '-', totalDisc: '-', rpp: '$ 12.41', annRev: '$ 1,074,292' }
-    ].concat(SERVICE_ROWS);
+    return [{
+      label: '{customer} MAIN',
+      expanded: true,
+      adv: '17313.0',
+      baseFrt: '51.3%',
+      totalDisc: '56.0%',
+      rpp: '$ 12.41',
+      annRev: '$ 1,074,292',
+      children: [
+        { label: 'Sub total', adv: '-', baseFrt: '-', totalDisc: '-', rpp: '$ 12.41', annRev: '$ 1,074,292' }
+      ].concat(SERVICE_ROWS)
+    }];
   }
 
   DA.data.packetSummaryTrees = {
     Current: [
-      { label: 'Total', level: 0, total: true, adv: '17313.0', baseFrt: '51.3%', totalDisc: '56.0%', rpp: '$ 12.41', annRev: '$ 1,074,292' }
+      { label: 'Total', total: true, adv: '17313.0', baseFrt: '51.3%', totalDisc: '56.0%', rpp: '$ 12.41', annRev: '$ 1,074,292' }
     ].concat(accountBlock()),
 
     'Scenario 1': [
-      { label: 'Total', level: 0, total: true, adv: '17340.2', baseFrt: '50.9%', totalDisc: '55.5%', rpp: '$ 12.57', annRev: '$ 1,094,443' },
-      { label: 'Unincented PLD', level: 0, expandable: true, adv: '27.2', baseFrt: '0.0%', totalDisc: '0.0%', rpp: '$ 38.48', annRev: '$ 20,151' }
+      { label: 'Total', total: true, adv: '17340.2', baseFrt: '50.9%', totalDisc: '55.5%', rpp: '$ 12.57', annRev: '$ 1,094,443' },
+      {
+        label: 'Unincented PLD',
+        adv: '27.2', baseFrt: '0.0%', totalDisc: '0.0%', rpp: '$ 38.48', annRev: '$ 20,151',
+        children: [
+          { label: 'Sub total', adv: '-', baseFrt: '-', totalDisc: '-', rpp: '$ 38.48', annRev: '$ 20,151' },
+          { label: 'GND', adv: '19.6', baseFrt: '0.0%', totalDisc: '0.0%', rpp: '$ 36.12', annRev: '$ 14,509' },
+          { label: 'USG', adv: '7.6', baseFrt: '0.0%', totalDisc: '0.0%', rpp: '$ 44.57', annRev: '$ 5,642' }
+        ]
+      }
     ].concat(accountBlock())
   };
 
@@ -148,14 +165,23 @@
     { volume: '1497', adv: '299.4', pps: '1', weightPiece: '12.12', freightGrossSpent: '$ 21,525.93', freightDiscount: '37.83%', freightRpp: '$ 8.94', freightNetSpent: '$ 13,382.90', freightProfit: '$ 380.12', freightOr: '0.97' }
   ]);
 
-  /** Accessorial charges, grouped: a parent total then its detail lines. */
+  /** Accessorial charges: a parent total over the services that incurred it. */
   DA.data.shippingProfileAccessorial = [
-    { type: 'Fuel Surcharge', group: 'Fuel Surcharge', detail: 'Fuel Surcharge', expandable: true, totalUnits: '86546.0', pctTotalVolume: '100.8%', adu: '17309.2', grossRevenue: '$ 427,712.00', netRevenue: '$ 121,670.00', discount: '71.6%' },
-    { detail: '3 Day Select', child: true, totalUnits: '357.0', pctTotalVolume: '0.4%', adu: '71.4', grossRevenue: '$ 4,906.00', netRevenue: '$ 1,226.00', discount: '75.0%' },
-    { detail: 'Next Day Air', child: true, totalUnits: '652.0', pctTotalVolume: '0.8%', adu: '130.4', grossRevenue: '$ 23,572.00', netRevenue: '$ 7,175.00', discount: '69.6%' },
-    { detail: '2nd Day Air A.M.', child: true, totalUnits: '9.0', pctTotalVolume: '0.0%', adu: '1.8', grossRevenue: '$ 139.00', netRevenue: '$ 68.00', discount: '51.3%' },
-    { detail: 'Ground Saver > 1 lbs', child: true, totalUnits: '62796.0', pctTotalVolume: '73.1%', adu: '12559.2', grossRevenue: '$ 258,502.00', netRevenue: '$ 77,395.00', discount: '70.1%' },
-    { detail: 'Next Day Air Saver', child: true, totalUnits: '68.0', pctTotalVolume: '0.1%', adu: '13.6', grossRevenue: '$ 2,377.00', netRevenue: '$ 547.00', discount: '77.0%' }
+    {
+      type: 'Fuel Surcharge',
+      group: 'Fuel Surcharge',
+      detail: 'Fuel Surcharge',
+      expanded: true,
+      totalUnits: '86546.0', pctTotalVolume: '100.8%', adu: '17309.2',
+      grossRevenue: '$ 427,712.00', netRevenue: '$ 121,670.00', discount: '71.6%',
+      children: [
+        { type: '', group: '', detail: '3 Day Select', totalUnits: '357.0', pctTotalVolume: '0.4%', adu: '71.4', grossRevenue: '$ 4,906.00', netRevenue: '$ 1,226.00', discount: '75.0%' },
+        { type: '', group: '', detail: 'Next Day Air', totalUnits: '652.0', pctTotalVolume: '0.8%', adu: '130.4', grossRevenue: '$ 23,572.00', netRevenue: '$ 7,175.00', discount: '69.6%' },
+        { type: '', group: '', detail: '2nd Day Air A.M.', totalUnits: '9.0', pctTotalVolume: '0.0%', adu: '1.8', grossRevenue: '$ 139.00', netRevenue: '$ 68.00', discount: '51.3%' },
+        { type: '', group: '', detail: 'Ground Saver > 1 lbs', totalUnits: '62796.0', pctTotalVolume: '73.1%', adu: '12559.2', grossRevenue: '$ 258,502.00', netRevenue: '$ 77,395.00', discount: '70.1%' },
+        { type: '', group: '', detail: 'Next Day Air Saver', totalUnits: '68.0', pctTotalVolume: '0.1%', adu: '13.6', grossRevenue: '$ 2,377.00', netRevenue: '$ 547.00', discount: '77.0%' }
+      ]
+    }
   ];
 
   /* ---- Pricing terms tab -------------------------------------------------- */
@@ -224,21 +250,28 @@
   /** Accessorial charges under pricing terms, grouped by charge family. */
   DA.data.pricingAccessorials = [
     { group: 'Ground Saver', detail: 'Ground Saver < 1 lbs', totalUnits: '1495.0', pctTotalVolume: '1.7%', adu: '299.0', grossRevenue: '$ 5,253.00', netRevenue: '$ 1,868.00', discount: '64.4%', rate: '$ 3.51' },
-    { group: 'Other Charges', detail: 'Third Party Billing Service', expandable: true, totalUnits: '92.0', pctTotalVolume: '0.1%', adu: '18.4', grossRevenue: '$ 576.00', netRevenue: '$ 114.00', discount: '80.2%', rate: '$ 6.27' },
-    { group: 'Other Pickup and Delivery', detail: 'Saturday Air Processing Fee (Saturday)', expandable: true, totalUnits: '26.0', pctTotalVolume: '0.0%', adu: '5.2', grossRevenue: '$ 416.00', netRevenue: '$ 208.00', discount: '50.0%', rate: '$ 16.00' },
-    { group: 'Saturday Delivery', detail: 'Saturday Delivery', expandable: true, totalUnits: '5.0', pctTotalVolume: '0.0%', adu: '1.0', grossRevenue: '$ 80.00', netRevenue: '$ 40.00', discount: '50.0%', rate: '$ 16.00' },
-    { group: 'Return Labels', detail: 'Electronic Label', expandable: true, totalUnits: '360.0', pctTotalVolume: '0.4%', adu: '72.0', grossRevenue: '$ 414.00', netRevenue: '$ 205.00', discount: '50.4%', rate: '$ 1.15' },
-    { group: 'Return Labels', detail: 'Print Return Label', expandable: true, totalUnits: '39.0', pctTotalVolume: '0.0%', adu: '7.8', grossRevenue: '$ 45.00', netRevenue: '$ 22.00', discount: '50.4%', rate: '$ 1.15' },
-    { group: 'Additional Handling', detail: 'Additional Handling Length', expandable: true, totalUnits: '3.0', pctTotalVolume: '0.0%', adu: '0.6', grossRevenue: '$ 107.00', netRevenue: '$ 80.00', discount: '25.0%', rate: '$ 35.67' },
-    { group: 'Additional Handling', detail: 'Additional Handling Length + Girth', expandable: true, totalUnits: '18.0', pctTotalVolume: '0.0%', adu: '3.6', grossRevenue: '$ 685.00', netRevenue: '$ 514.00', discount: '25.0%', rate: '$ 38.04' },
-    { group: 'Additional Handling', detail: 'Additional Handling Packaging', expandable: true, totalUnits: '15.0', pctTotalVolume: '0.0%', adu: '3.0', grossRevenue: '$ 477.00', netRevenue: '$ 358.00', discount: '25.0%', rate: '$ 31.78' },
-    { group: 'Additional Handling', detail: 'Additional Handling Weight', expandable: true, totalUnits: '45.0', pctTotalVolume: '0.1%', adu: '9.0', grossRevenue: '$ 2,430.00', netRevenue: '$ 1,822.00', discount: '25.0%', rate: '$ 53.99' },
-    { group: 'Additional Handling', detail: 'Additional Handling Width', expandable: true, totalUnits: '1.0', pctTotalVolume: '0.0%', adu: '0.2', grossRevenue: '$ 38.00', netRevenue: '$ 29.00', discount: '25.0%', rate: '$ 38.50' },
-    { group: 'Delivery Area', detail: 'Delivery Area Commercial', expandable: true, totalUnits: '729.0', pctTotalVolume: '0.8%', adu: '145.8', grossRevenue: '$ 3,280.00', netRevenue: '$ 1,312.00', discount: '60.0%', rate: '$ 4.50' },
-    { group: 'Delivery Area', detail: 'Delivery Area Commercial Extended', expanded: true, totalUnits: '175.0', pctTotalVolume: '0.2%', adu: '35.0', grossRevenue: '$ 997.00', netRevenue: '$ 399.00', discount: '60.0%', rate: '$ 5.70' },
-    { detail: 'Next Day Air', child: true, totalUnits: '9.0', pctTotalVolume: '0.0%', adu: '1.8', grossRevenue: '$ 51.00', netRevenue: '$ 21.00', discount: '60.0%', rate: '$ 5.70' },
-    { detail: 'Ground', child: true, totalUnits: '164.0', pctTotalVolume: '0.2%', adu: '32.8', grossRevenue: '$ 935.00', netRevenue: '$ 374.00', discount: '60.0%', rate: '$ 5.70' },
-    { detail: '2nd Day Air', child: true, totalUnits: '1.0', pctTotalVolume: '0.0%', adu: '0.2', grossRevenue: '$ 6.00', netRevenue: '$ 2.00', discount: '60.0%', rate: '$ 5.70' }
+    { group: 'Other Charges', detail: 'Third Party Billing Service', totalUnits: '92.0', pctTotalVolume: '0.1%', adu: '18.4', grossRevenue: '$ 576.00', netRevenue: '$ 114.00', discount: '80.2%', rate: '$ 6.27' },
+    { group: 'Other Pickup and Delivery', detail: 'Saturday Air Processing Fee (Saturday)', totalUnits: '26.0', pctTotalVolume: '0.0%', adu: '5.2', grossRevenue: '$ 416.00', netRevenue: '$ 208.00', discount: '50.0%', rate: '$ 16.00' },
+    { group: 'Saturday Delivery', detail: 'Saturday Delivery', totalUnits: '5.0', pctTotalVolume: '0.0%', adu: '1.0', grossRevenue: '$ 80.00', netRevenue: '$ 40.00', discount: '50.0%', rate: '$ 16.00' },
+    { group: 'Return Labels', detail: 'Electronic Label', totalUnits: '360.0', pctTotalVolume: '0.4%', adu: '72.0', grossRevenue: '$ 414.00', netRevenue: '$ 205.00', discount: '50.4%', rate: '$ 1.15' },
+    { group: 'Return Labels', detail: 'Print Return Label', totalUnits: '39.0', pctTotalVolume: '0.0%', adu: '7.8', grossRevenue: '$ 45.00', netRevenue: '$ 22.00', discount: '50.4%', rate: '$ 1.15' },
+    { group: 'Additional Handling', detail: 'Additional Handling Length', totalUnits: '3.0', pctTotalVolume: '0.0%', adu: '0.6', grossRevenue: '$ 107.00', netRevenue: '$ 80.00', discount: '25.0%', rate: '$ 35.67' },
+    { group: 'Additional Handling', detail: 'Additional Handling Length + Girth', totalUnits: '18.0', pctTotalVolume: '0.0%', adu: '3.6', grossRevenue: '$ 685.00', netRevenue: '$ 514.00', discount: '25.0%', rate: '$ 38.04' },
+    { group: 'Additional Handling', detail: 'Additional Handling Packaging', totalUnits: '15.0', pctTotalVolume: '0.0%', adu: '3.0', grossRevenue: '$ 477.00', netRevenue: '$ 358.00', discount: '25.0%', rate: '$ 31.78' },
+    { group: 'Additional Handling', detail: 'Additional Handling Weight', totalUnits: '45.0', pctTotalVolume: '0.1%', adu: '9.0', grossRevenue: '$ 2,430.00', netRevenue: '$ 1,822.00', discount: '25.0%', rate: '$ 53.99' },
+    { group: 'Additional Handling', detail: 'Additional Handling Width', totalUnits: '1.0', pctTotalVolume: '0.0%', adu: '0.2', grossRevenue: '$ 38.00', netRevenue: '$ 29.00', discount: '25.0%', rate: '$ 38.50' },
+    { group: 'Delivery Area', detail: 'Delivery Area Commercial', totalUnits: '729.0', pctTotalVolume: '0.8%', adu: '145.8', grossRevenue: '$ 3,280.00', netRevenue: '$ 1,312.00', discount: '60.0%', rate: '$ 4.50' },
+    {
+      group: 'Delivery Area', detail: 'Delivery Area Commercial Extended',
+      expanded: true,
+      totalUnits: '175.0', pctTotalVolume: '0.2%', adu: '35.0',
+      grossRevenue: '$ 997.00', netRevenue: '$ 399.00', discount: '60.0%', rate: '$ 5.70',
+      children: [
+        { group: '', detail: 'Next Day Air', totalUnits: '9.0', pctTotalVolume: '0.0%', adu: '1.8', grossRevenue: '$ 51.00', netRevenue: '$ 21.00', discount: '60.0%', rate: '$ 5.70' },
+        { group: '', detail: 'Ground', totalUnits: '164.0', pctTotalVolume: '0.2%', adu: '32.8', grossRevenue: '$ 935.00', netRevenue: '$ 374.00', discount: '60.0%', rate: '$ 5.70' },
+        { group: '', detail: '2nd Day Air', totalUnits: '1.0', pctTotalVolume: '0.0%', adu: '0.2', grossRevenue: '$ 6.00', netRevenue: '$ 2.00', discount: '60.0%', rate: '$ 5.70' }
+      ]
+    }
   ];
 
   /** Rows behind Shipping Profiles > Service. */

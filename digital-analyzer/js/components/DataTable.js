@@ -6,6 +6,10 @@
  * alignment and row comparison survive on every screen size.
  *
  * columns: [{ key, label, width, align, className, render(row) -> Node|string }]
+ *
+ * Rows expand when `getChildren(row)` returns rows: the cell named by
+ * `expandKey` grows a disclosure toggle, and the children appear beneath their
+ * parent, indented, until it is closed again.
  */
 (function (DA) {
   'use strict';
@@ -41,38 +45,91 @@
     ]);
 
     var body = el('tbody');
-
-    if (rows.length === 0) {
-      body.appendChild(
-        el('tr', {}, [
-          el('td', { attrs: { colspan: columns.length }, style: { 'white-space': 'normal' } }, [
-            options.emptyState || DA.components.EmptyState({ title: 'No records found' })
-          ])
-        ])
-      );
-    } else {
-      rows.forEach(function (row) {
-        body.appendChild(
-          el(
-            'tr',
-            { className: options.rowClassName ? options.rowClassName(row) : '' },
-            columns.map(function (column) {
-              var content = column.render ? column.render(row) : row[column.key];
-              var isNode = content instanceof Node;
-              return el(
-                'td',
-                {
-                  className: column.className || '',
-                  text: isNode ? null : content,
-                  attrs: { title: isNode ? false : String(content == null ? '' : content) }
-                },
-                isNode ? [content] : null
-              );
-            })
-          )
-        );
+    // Rows flagged `expanded` start open, as the reference screens show them.
+    var open = [];
+    (function seed(list) {
+      (list || []).forEach(function (row) {
+        if (row && row.expanded) open.push(row);
+        if (row && row.children) seed(row.children);
       });
+    })(rows);
+
+    function childrenOf(row) {
+      var children = options.getChildren ? options.getChildren(row) : null;
+      return children && children.length ? children : null;
     }
+
+    function cell(column, row, depth) {
+      var content = column.render ? column.render(row) : row[column.key];
+      var isNode = content instanceof Node;
+      var children = column.key === options.expandKey ? childrenOf(row) : null;
+
+      if (column.key === options.expandKey) {
+        var label = isNode ? content : el('span', { text: content == null ? '' : String(content) });
+        var expanded = open.indexOf(row) !== -1;
+        var inner = [];
+
+        if (children) {
+          inner.push(el('button', {
+            className: 'row-toggle',
+            attrs: {
+              type: 'button',
+              'aria-expanded': expanded ? 'true' : 'false',
+              'aria-label': (expanded ? 'Collapse ' : 'Expand ') +
+                (isNode ? (row[column.key] || 'row') : String(content))
+            },
+            on: {
+              click: function () {
+                var at = open.indexOf(row);
+                if (at === -1) open.push(row); else open.splice(at, 1);
+                render();
+              }
+            }
+          }, [expanded ? DA.icons.chevronDown(14) : DA.icons.chevronRight(14, '')]));
+        }
+        inner.push(label);
+
+        return el('td', {
+          className: (column.className || '') + ' has-expander' +
+            (depth ? ' is-child-cell' : ''),
+          style: depth ? { 'padding-left': (depth * 20 + 12) + 'px' } : {}
+        }, [el('span', { className: 'expand-cell' }, inner)]);
+      }
+
+      return el('td', {
+        className: column.className || '',
+        text: isNode ? null : content,
+        attrs: { title: isNode ? false : String(content == null ? '' : content) }
+      }, isNode ? [content] : null);
+    }
+
+    function addRow(row, depth) {
+      body.appendChild(el('tr', {
+        className: (options.rowClassName ? options.rowClassName(row) : '') +
+          (depth ? ' is-child-row' : '')
+      }, columns.map(function (column) { return cell(column, row, depth); })));
+
+      if (open.indexOf(row) !== -1) {
+        (childrenOf(row) || []).forEach(function (child) { addRow(child, depth + 1); });
+      }
+    }
+
+    function render() {
+      DA.dom.clear(body);
+      if (rows.length === 0) {
+        body.appendChild(
+          el('tr', {}, [
+            el('td', { attrs: { colspan: columns.length }, style: { 'white-space': 'normal' } }, [
+              options.emptyState || DA.components.EmptyState({ title: 'No records found' })
+            ])
+          ])
+        );
+        return;
+      }
+      rows.forEach(function (row) { addRow(row, 0); });
+    }
+
+    render();
 
     var table = el('table', {
       className: 'data-table' +

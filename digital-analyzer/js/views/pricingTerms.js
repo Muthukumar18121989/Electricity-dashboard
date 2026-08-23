@@ -179,7 +179,9 @@
           label: 'Incentive Method',
           hideLabel: true,
           value: 'Weight Break',
-          options: [{ value: 'Weight Break', label: 'Weight Break' }]
+          options: DA.data.filterOptions.incentiveMethod.map(function (value) {
+            return { value: value, label: value };
+          })
         })
       ]),
       el('div', { className: 'card' }, [
@@ -232,36 +234,8 @@
   function accessorialsView(numeric) {
     var C = DA.components;
 
-    function labelColumn(key, label, options) {
-      options = options || {};
-      return {
-        key: key,
-        label: label,
-        width: options.width || '190px',
-        className: 'is-rowhead-dark',
-        render: function (row) {
-          if (!row[key]) return el('span');
-          if (!options.expander) return el('span', { className: 'tree-cell__label', text: row[key] });
-          return el('span', {
-            className: 'tree-cell' + (row.child ? ' tree-cell--indent' : '')
-          }, [
-            row.expandable || row.expanded
-              ? el('button', {
-                  className: 'row-expander',
-                  attrs: {
-                    type: 'button',
-                    'aria-expanded': row.expanded ? 'true' : 'false',
-                    'aria-label': (row.expanded ? 'Collapse ' : 'Expand ') + row[key]
-                  }
-                }, [
-                  el('span', { className: 'row-expander__label', text: row[key] }),
-                  row.expanded ? DA.icons.chevronDown(14, 'row-expander__icon')
-                               : DA.icons.chevronRight(14, 'row-expander__icon')
-                ])
-              : el('span', { className: 'tree-cell__label', text: row[key] })
-          ]);
-        }
-      };
+    function labelColumn(key, label, width) {
+      return { key: key, label: label, width: width || '190px', className: 'is-rowhead-dark' };
     }
 
     return el('div', { className: 'card' }, [
@@ -270,9 +244,16 @@
         embedded: true,
         headerTone: 'warm',
         tinted: true,
+        expandKey: 'detail',
+        // Charges the reference breaks out keep their own lines; the rest are
+        // split across the services that incurred them.
+        getChildren: function (row) {
+          return row.children ||
+            DA.data.serviceBreakdown(row, 'detail', DA.data.additive.accessorial);
+        },
         columns: [
           labelColumn('group', 'Group'),
-          labelColumn('detail', 'Detail', { width: '260px', expander: true }),
+          labelColumn('detail', 'Detail', '280px'),
           numeric('totalUnits', 'Total Units', { link: true, width: '120px' }),
           numeric('pctTotalVolume', '% Total Volume', { link: true, width: '150px' }),
           numeric('adu', 'ADU', { link: true, width: '110px' }),
