@@ -1211,9 +1211,19 @@
   min-width: 0;
 }
 
-/* Label/value pair — inline on the header row, stacked in the detail grid. */
+/*
+ * Label/value pair — inline on the header row, stacked in the detail grid.
+ * Kept to one line: the detail grid lays out each column as an independent
+ * flex stack, so a value long enough to wrap made only that column taller
+ * row-by-row, and every row below it drifted out of alignment with its
+ * neighbours. Truncating keeps every row the same height; the full value
+ * is still available via the title tooltip.
+ */
 .detail {
   min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: var(--font-size-xs);
   line-height: var(--line-height-snug);
 }

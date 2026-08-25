@@ -14,13 +14,17 @@
   var uid = 0;
 
   DA.components.Detail = function Detail(options) {
-    return el('p', { className: 'detail' }, [
+    var value = options.value == null || options.value === '' ? '-' : String(options.value);
+    return el('p', {
+      className: 'detail',
+      // A long value stays on one line (truncated) rather than wrapping —
+      // wrapped text made one column's rows taller than its neighbours',
+      // so every column drifted out of alignment below the first item.
+      attrs: { title: options.label + ': ' + value }
+    }, [
       el('span', { className: 'detail__label', text: options.label + ':' }),
       ' ',
-      el('span', {
-        className: 'detail__value',
-        text: options.value == null || options.value === '' ? '-' : String(options.value)
-      })
+      el('span', { className: 'detail__value', text: value })
     ]);
   };
 
