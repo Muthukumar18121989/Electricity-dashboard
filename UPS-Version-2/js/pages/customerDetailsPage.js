@@ -162,20 +162,31 @@
         attrs: { id: 'customer-details-title' }
       }),
       el('div', { className: 'form-grid' }, [
+        el('h3', { className: 'section-title form-grid__full form-section-title--first', text: 'Customer' }),
         hierarchyField,
         customerLookupSlot,
-        pqrField,
-        oppField,
         el('div', { className: 'form-grid__full' }, [referenceField]),
         el('div', { className: 'form-grid__full' }, [customerNameField]),
         el('div', { className: 'form-grid__full' }, [descriptionField]),
+
+        el('h3', { className: 'section-title form-grid__full', text: 'Linked Records' }),
+        el('p', {
+          className: 'field__hint form-grid__full',
+          text: 'Optional — link an existing pricing quote request or opportunity records to this packet.'
+        }),
+        pqrField,
+        oppField,
+
+        el('h3', { className: 'section-title form-grid__full', text: 'Shipping Profile' }),
         fromField,
         toField,
-        el('div', { className: 'form-grid__full' }, [duration])
+        el('div', { className: 'form-grid__full' }, [duration]),
+        el('div', { className: 'form-grid__full' }, [
+          C.Toggle({ label: 'Annualize :', valueLabel: 'Yes', checked: true })
+        ])
       ]),
       el('hr', { className: 'form-divider' }),
-      C.Toggle({ label: 'Annualize :', valueLabel: 'Yes', checked: true }),
-      el('div', { style: { 'margin-top': 'var(--space-5)' } }, [pldSection])
+      pldSection
     ]);
 
     var actions = el('div', { className: 'page-actions' }, [

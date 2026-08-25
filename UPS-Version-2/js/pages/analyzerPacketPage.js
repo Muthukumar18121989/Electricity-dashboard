@@ -254,6 +254,20 @@
       ];
     }
 
+    /**
+     * The three lane-identifying columns (Movement, Mode, Core Service) can
+     * stay pinned to the left edge while the rest of a wide table scrolls —
+     * their fixed widths (110 + 115 + 175px) are what the sticky offsets
+     * below are keyed to.
+     */
+    function stickyKeyColumns() {
+      var columns = profileKeyColumns();
+      columns[0].className += ' is-sticky-col is-sticky-col-1';
+      columns[1].className += ' is-sticky-col is-sticky-col-2';
+      columns[2].className += ' is-sticky-col is-sticky-col-3 is-sticky-col-last';
+      return columns;
+    }
+
     function profileTable(options) {
       return el('div', {}, [
         profileFilters(),
@@ -263,13 +277,14 @@
             embedded: true,
             headerTone: 'warm',
             tinted: true,
+            className: options.stickyCols ? 'data-table--sticky-cols' : '',
             expandKey: 'service',
             // A lane opens onto the zones it shipped in.
             getChildren: function (row) {
               if (row.zone !== '-') return null;
               return DA.data.zoneBreakdown(row, 'service', DA.data.additive[options.additive]);
             },
-            columns: profileKeyColumns().concat(options.columns),
+            columns: (options.stickyCols ? stickyKeyColumns() : profileKeyColumns()).concat(options.columns),
             rows: options.rows
           })
         ])
@@ -317,6 +332,7 @@
       return profileTable({
         caption: 'Shipping profile cost',
         additive: 'cost',
+        stickyCols: true,
         rows: DA.data.shippingProfileCost,
         columns: [
           numeric('volume', 'Volume', { link: true, width: '110px' }),
@@ -449,6 +465,69 @@
 
     /* ---- Composition ------------------------------------------------------ */
 
+    var reportTabs = C.Tabs({
+      ariaLabel: 'Report sections',
+      value: 'summary',
+      items: [
+        { id: 'summary', label: 'Summary', render: function () {
+          return el('section', { className: 'panel panel--auto' }, [summaryView()]);
+        } },
+        { id: 'rate-charts', label: 'Rate Charts', render: emptyView('Rate Chart') },
+        { id: 'shipping-profiles', label: 'Shipping Profiles', render: function () {
+          return el('section', { className: 'panel panel--auto' }, [
+            el('div', { className: 'panel__content' }, [shippingProfilesView()])
+          ]);
+        } },
+        { id: 'pricing-terms', label: 'Pricing terms', render: function () {
+          return el('section', { className: 'panel panel--auto' }, [
+            el('div', { className: 'panel__content' }, [
+              DA.views.PricingTerms({
+                packet: packet,
+                numeric: numeric,
+                filters: pricingFilters,
+                emptyView: emptyView
+              })
+            ])
+          ]);
+        } },
+        { id: 'other-terms', label: 'Other terms', render: emptyView('Other Term') }
+      ]
+    });
+
+    // The tab bar moves up into the sticky sub-header, alongside the filters
+    // that scope every tab's data — both stay in view while a dense table
+    // (Shipping Profiles > Cost is 20+ columns) scrolls underneath. The tab
+    // panel itself is left where Tabs put it, so tab switching is untouched.
+    var reportTabList = reportTabs.querySelector('.tabs__list');
+    reportTabList.parentNode.removeChild(reportTabList);
+
+    var stickySubheader = el('div', { className: 'sticky-subheader tabs--page' }, [
+      el('div', { className: 'report-filters' }, [
+        el('div', { className: 'report-filters__field' }, [comparisonSelector]),
+        el('div', { className: 'report-filters__field' }, [
+          C.SelectField({ label: 'Revenue Basis', value: 'All', options: asOptions(DA.data.filterOptions.revenueBasis) })
+        ]),
+        el('div', { className: 'report-filters__field' }, [
+          C.SelectField({
+            label: 'Cost Basis',
+            value: 'Fully Allocated Cost',
+            options: asOptions(DA.data.filterOptions.costBasis)
+          })
+        ]),
+        el('div', { className: 'report-filters__actions' }, [
+          C.Button({
+            label: 'Reset',
+            variant: 'outline',
+            shape: 'pill',
+            icon: DA.icons.refresh(15),
+            iconPosition: 'end'
+          })
+        ])
+      ]),
+      C.FilterChips({ ariaLabel: 'Applied charge filters', values: DA.data.chargeFilters }),
+      reportTabList
+    ]);
+
     var page = el('main', { className: 'page', attrs: { id: 'main-content' } }, [
       C.Breadcrumb({
         separator: '/',
@@ -479,60 +558,9 @@
           onClick: function () { if (options.onBack) options.onBack(); }
         })
       ]),
-      el('div', { className: 'report-filters' }, [
-        el('div', { className: 'report-filters__field' }, [comparisonSelector]),
-        el('div', { className: 'report-filters__field' }, [
-          C.SelectField({ label: 'Revenue Basis', value: 'All', options: asOptions(DA.data.filterOptions.revenueBasis) })
-        ]),
-        el('div', { className: 'report-filters__field' }, [
-          C.SelectField({
-            label: 'Cost Basis',
-            value: 'Fully Allocated Cost',
-            options: asOptions(DA.data.filterOptions.costBasis)
-          })
-        ]),
-        el('div', { className: 'report-filters__actions' }, [
-          C.Button({
-            label: 'Reset',
-            variant: 'outline',
-            shape: 'pill',
-            icon: DA.icons.refresh(15),
-            iconPosition: 'end'
-          })
-        ])
-      ]),
-      C.FilterChips({ ariaLabel: 'Applied charge filters', values: DA.data.chargeFilters }),
       comparisonBand,
-      el('div', { className: 'tabs--page' }, [
-        C.Tabs({
-          ariaLabel: 'Report sections',
-          value: 'summary',
-          items: [
-            { id: 'summary', label: 'Summary', render: function () {
-              return el('section', { className: 'panel panel--auto' }, [summaryView()]);
-            } },
-            { id: 'rate-charts', label: 'Rate Charts', render: emptyView('Rate Chart') },
-            { id: 'shipping-profiles', label: 'Shipping Profiles', render: function () {
-              return el('section', { className: 'panel panel--auto' }, [
-                el('div', { className: 'panel__content' }, [shippingProfilesView()])
-              ]);
-            } },
-            { id: 'pricing-terms', label: 'Pricing terms', render: function () {
-              return el('section', { className: 'panel panel--auto' }, [
-                el('div', { className: 'panel__content' }, [
-                  DA.views.PricingTerms({
-                    packet: packet,
-                    numeric: numeric,
-                    filters: pricingFilters,
-                    emptyView: emptyView
-                  })
-                ])
-              ]);
-            } },
-            { id: 'other-terms', label: 'Other terms', render: emptyView('Other Term') }
-          ]
-        })
-      ])
+      stickySubheader,
+      reportTabs
     ]);
 
     return page;

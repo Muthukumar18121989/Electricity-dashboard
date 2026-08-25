@@ -138,6 +138,13 @@
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Reserved for surfaces that float freely over content (toast, popover on
+     scroll) rather than sitting in-flow — one step past shadow-md, still
+     restrained. */
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.18);
+  /* The trailing edge painted behind a sticky table column so its boundary
+     reads while content still scrolls beneath it. */
+  --shadow-sticky-edge: 4px 0 6px -4px rgba(0, 0, 0, 0.12);
 
   /* ---- Component dimensions ---------------------------------------------- */
   --app-header-height: 86px;
@@ -172,6 +179,8 @@
   /* ---- Motion ------------------------------------------------------------ */
   --duration-fast: 120ms;
   --duration-base: 180ms;
+  /* Ambient motion only (loading shimmer) — never an interaction response. */
+  --duration-slow: 1400ms;
   --easing-standard: cubic-bezier(0.2, 0, 0.2, 1);
 }
 
@@ -179,6 +188,7 @@
   :root {
     --duration-fast: 0ms;
     --duration-base: 0ms;
+    --duration-slow: 0ms;
   }
 }
 

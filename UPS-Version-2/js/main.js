@@ -15,18 +15,39 @@
   // The packet under construction, so a screen can be revisited with its state.
   var current = { packet: null };
 
+  // The New Analyzer Packet journey spans three screens; Account Association
+  // is a sub-task reached from inside step 2, not a step of its own.
+  var JOURNEY_STEPS = [
+    { label: 'Customer Details', view: 'customer-details' },
+    { label: 'Create Scenarios', view: 'create-scenarios' },
+    { label: 'Analyzer Packet', view: 'analyzer-packet' }
+  ];
+
+  function journeyFor(index) {
+    return {
+      steps: JOURNEY_STEPS,
+      current: index,
+      // Only a step already reached (the packet exists) is a valid shortcut.
+      onSelect: function (target) {
+        if (!current.packet && target > 0) return;
+        navigate(JOURNEY_STEPS[target].view);
+      }
+    };
+  }
+
   var views = {
     packets: {
       render: function () {
         return DA.pages.AnalyzerPacketsPage({
           rows: DA.data.analyzerPackets,
           currentUser: DA.session.currentUser,
-          onNewPacket: function () { navigate('customer-details'); }
+          onNewPacket: function () { current.packet = null; navigate('customer-details'); }
         });
       }
     },
 
     'customer-details': {
+      header: function () { return { journey: journeyFor(0) }; },
       render: function () {
         return DA.pages.CustomerDetailsPage({
           onBack: function () { navigate('packets'); },
@@ -39,6 +60,7 @@
     },
 
     'create-scenarios': {
+      header: function () { return { journey: journeyFor(1) }; },
       render: function (params) {
         return DA.pages.CreateScenariosPage({
           packet: current.packet,
@@ -54,7 +76,10 @@
 
     'analyzer-packet': {
       header: function () {
-        return { backLink: { label: 'Back to My Analyzers', onClick: function () { navigate('packets'); } } };
+        return {
+          backLink: { label: 'Back to My Analyzers', onClick: function () { navigate('packets'); } },
+          journey: journeyFor(2)
+        };
       },
       render: function () {
         return DA.pages.AnalyzerPacketPage({
@@ -88,7 +113,8 @@
       DA.components.AppHeader({
         productName: 'Digital Analyzer',
         user: DA.session.currentUser,
-        backLink: header.backLink
+        backLink: header.backLink,
+        journey: header.journey
       })
     );
 

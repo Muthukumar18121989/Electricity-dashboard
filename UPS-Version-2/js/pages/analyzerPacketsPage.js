@@ -18,6 +18,7 @@
       key: 'packetId',
       label: 'Analyzer Packet ID',
       width: '150px',
+      sortable: true,
       render: function (row) {
         return C.RecordLink({
           label: row.packetId,
@@ -26,20 +27,43 @@
         });
       }
     },
-    { key: 'customerName', label: 'Customer Name', width: '155px' },
+    { key: 'customerName', label: 'Customer Name', width: '155px', sortable: true },
     { key: 'customerNumber', label: 'Customer Number', width: '135px', className: 'is-numeric is-muted' },
-    { key: 'owner', label: 'Owner', width: '150px' },
+    { key: 'owner', label: 'Owner', width: '150px', sortable: true },
     {
       key: 'status',
       label: 'Status',
       width: '175px',
+      sortable: true,
       render: function (row) { return C.StatusBadge(row.status); }
     },
-    { key: 'createdDate', label: 'Created Date', width: '105px', className: 'is-numeric' },
-    { key: 'lastModifiedDate', label: 'Last Modified Date', width: '140px', className: 'is-numeric' },
-    { key: 'scenarios', label: 'Scenarios', width: '90px', className: 'is-numeric' },
+    { key: 'createdDate', label: 'Created Date', width: '105px', className: 'is-numeric', sortable: true },
+    { key: 'lastModifiedDate', label: 'Last Modified Date', width: '140px', className: 'is-numeric', sortable: true },
+    { key: 'scenarios', label: 'Scenarios', width: '90px', className: 'is-numeric', sortable: true },
     { key: 'customerHierarchy', label: 'Customer Hierarchy', width: '145px' }
   ];
+
+  /** Sort comparator shared by every sortable column on this table. */
+  function compareBy(key) {
+    var isDate = key === 'createdDate' || key === 'lastModifiedDate';
+    return function (a, b) {
+      var av = a[key];
+      var bv = b[key];
+      if (isDate) {
+        av = (DA.format.parseDate(av) || 0).valueOf();
+        bv = (DA.format.parseDate(bv) || 0).valueOf();
+      } else if (typeof av === 'number' || typeof bv === 'number') {
+        av = Number(av) || 0;
+        bv = Number(bv) || 0;
+      } else {
+        av = String(av || '').toLowerCase();
+        bv = String(bv || '').toLowerCase();
+      }
+      if (av < bv) return -1;
+      if (av > bv) return 1;
+      return 0;
+    };
+  }
 
   function matchesQuery(row, query) {
     if (!query) return true;
@@ -74,7 +98,7 @@
     var allRows = options.rows || [];
     var currentUser = options.currentUser || {};
 
-    var state = { scope: SCOPE.ALL, query: '' };
+    var state = { scope: SCOPE.ALL, query: '', sort: null, loading: true };
 
     var tableMount = el('div', { className: 'panel__table-mount' });
 
@@ -86,13 +110,37 @@
     });
 
     function visibleRows() {
-      return allRows.filter(function (row) {
+      var rows = allRows.filter(function (row) {
         var inScope = state.scope === SCOPE.ALL || row.owner === currentUser.name;
         return inScope && matchesQuery(row, state.query);
       });
+      if (state.sort) {
+        rows = rows.slice().sort(compareBy(state.sort.key));
+        if (state.sort.dir === 'desc') rows.reverse();
+      }
+      return rows;
+    }
+
+    /** Three-state cycle per column: unsorted -> ascending -> descending -> unsorted. */
+    function handleSort(key) {
+      if (!state.sort || state.sort.key !== key) {
+        state.sort = { key: key, dir: 'asc' };
+      } else if (state.sort.dir === 'asc') {
+        state.sort = { key: key, dir: 'desc' };
+      } else {
+        state.sort = null;
+      }
+      render();
     }
 
     function render() {
+      if (state.loading) {
+        DA.dom.clear(tableMount).appendChild(
+          C.SkeletonTableRows({ rows: 8, label: 'Loading analyzer packets…' })
+        );
+        return;
+      }
+
       var rows = visibleRows();
 
       DA.dom.clear(tableMount).appendChild(
@@ -100,6 +148,8 @@
           caption: 'Analyzer packets',
           columns: COLUMNS,
           rows: rows,
+          sort: state.sort,
+          onSort: handleSort,
           emptyState: emptyStateFor(state)
         })
       );
@@ -127,6 +177,7 @@
       id: 'analyzer-packet-search',
       label: 'Search analyzer packets',
       placeholder: 'Search by Packet ID, Customer Name, or Owner',
+      clearable: true,
       onSearch: function (value) {
         state.query = value;
         render();
@@ -150,6 +201,14 @@
     });
 
     render();
+
+    // Packets load once, briefly, on first visit to this screen — a real
+    // fetch would have this latency; simulating it keeps the loading state
+    // from only ever existing in a mock.
+    window.setTimeout(function () {
+      state.loading = false;
+      render();
+    }, 500);
 
     return el('main', { className: 'page', attrs: { id: 'main-content' } }, [
       el('h2', { className: 'u-visually-hidden', text: 'Analyzer Packets' }),

@@ -69,7 +69,7 @@
           return C.Checkbox({
             checked: Boolean(account.selected),
             ariaLabel: 'Select ' + account.account,
-            onChange: function (checked) { account.selected = checked; }
+            onChange: function (checked) { account.selected = checked; updateBulkBar(); }
           });
         }
       },
@@ -131,6 +131,7 @@
             onChange: function (checked) {
               config.accounts.forEach(function (account) { account.selected = checked; });
               render();
+              updateBulkBar();
             }
           }),
           el('span', { className: 'tree__label tree__label--' + config.level, text: config.label })
@@ -140,29 +141,48 @@
     }
 
     var treeRoot = el('div', { className: 'tree' });
+    var state = { query: '' };
+
+    function matchesQuery(account) {
+      if (!state.query) return true;
+      return account.account.toLowerCase().indexOf(state.query) !== -1;
+    }
 
     function render() {
       DA.dom.clear(treeRoot);
+      var matched = 0;
+
       tree.forEach(function (parent) {
-        var parentAccounts = DA.data.accountsIn([parent]);
+        var groups = (parent.groups || [])
+          .map(function (group) {
+            var accounts = group.accounts.filter(matchesQuery);
+            matched += accounts.length;
+            return { group: group, accounts: accounts };
+          })
+          .filter(function (entry) { return entry.accounts.length > 0; });
+
+        if (state.query && groups.length === 0) return;
+
+        var parentAccounts = DA.data.accountsIn([parent]).filter(matchesQuery);
+
         treeRoot.appendChild(treeNode({
           label: parent.label,
           level: 'parent',
           accounts: parentAccounts,
-          children: (parent.groups || []).map(function (group) {
+          children: groups.map(function (entry) {
             return treeNode({
-              label: group.label,
+              label: entry.group.label,
               level: 'group',
               nested: true,
-              accounts: group.accounts,
+              accounts: entry.accounts,
               children: [
                 el('div', { className: 'tree__table' }, [
                   C.DataTable({
-                    caption: 'Accounts under ' + group.label,
+                    caption: 'Accounts under ' + entry.group.label,
                     embedded: true,
                     headerTone: 'warm',
                     columns: ACCOUNT_COLUMNS,
-                    rows: group.accounts
+                    rows: entry.accounts
                   })
                 ])
               ]
@@ -170,9 +190,69 @@
           })
         }));
       });
+
+      if (state.query && matched === 0) {
+        treeRoot.appendChild(C.EmptyState({
+          title: 'No accounts match your search',
+          description: 'No account name or number matches "' + state.query + '". Check the spelling or clear the search to see every account.'
+        }));
+      }
     }
 
     render();
+
+    /* ---- Bulk selection ----------------------------------------------------- */
+
+    var reviewButton = C.Button({
+      label: 'Review Changes',
+      variant: 'primary',
+      shape: 'pill',
+      icon: DA.icons.chevronRight(14, ''),
+      iconPosition: 'end',
+      onClick: function () {
+        var count = accounts.filter(function (a) { return a.selected; }).length;
+        accounts.forEach(function (a) { a.selected = false; });
+        render();
+        updateBulkBar();
+        DA.toast.show(
+          count === 1 ? '1 account association saved.' : count + ' account associations saved.',
+          { tone: 'success' }
+        );
+      }
+    });
+
+    var bulkCount = el('span', { className: 'bulk-bar__count' });
+    var bulkBar = el('div', { className: 'bulk-bar', attrs: { role: 'status', hidden: true } }, [
+      bulkCount,
+      el('div', { className: 'bulk-bar__actions' }, [
+        C.Button({
+          label: 'Clear selection',
+          variant: 'ghost',
+          className: 'button--on-dark',
+          onClick: function () {
+            accounts.forEach(function (a) { a.selected = false; });
+            render();
+            updateBulkBar();
+          }
+        }),
+        reviewButton
+      ])
+    ]);
+
+    function updateBulkBar() {
+      var count = accounts.filter(function (a) { return a.selected; }).length;
+      bulkCount.textContent = count === 1 ? '1 account selected' : count + ' accounts selected';
+
+      if (count > 0) {
+        bulkBar.hidden = false;
+        window.requestAnimationFrame(function () { bulkBar.classList.add('bulk-bar--visible'); });
+      } else {
+        bulkBar.classList.remove('bulk-bar--visible');
+        bulkBar.hidden = true;
+      }
+    }
+
+    updateBulkBar();
 
     /* ---- Composition ------------------------------------------------------- */
 
@@ -180,7 +260,11 @@
       id: 'account-search',
       label: 'Search accounts',
       placeholder: 'Search Accounts',
-      clearable: true
+      clearable: true,
+      onSearch: function (value) {
+        state.query = value.trim().toLowerCase();
+        render();
+      }
     });
 
     var page = el('main', { className: 'page', attrs: { id: 'main-content' } }, [
@@ -221,7 +305,12 @@
           label: 'Search',
           variant: 'primary',
           icon: DA.icons.chevronRight(14, ''),
-          iconPosition: 'end'
+          iconPosition: 'end',
+          onClick: function () {
+            var input = search.querySelector('.search-field__input');
+            state.query = (input ? input.value : '').trim().toLowerCase();
+            render();
+          }
         }),
         el('div', { className: 'search-bar__actions' }, [
           el('a', {
@@ -231,16 +320,7 @@
         ])
       ]),
       treeRoot,
-      el('div', { className: 'page-actions page-actions--wide' }, [
-        C.Button({
-          label: 'Review Changes',
-          variant: 'secondary',
-          shape: 'pill',
-          icon: DA.icons.chevronRight(14, ''),
-          iconPosition: 'end',
-          disabled: true
-        })
-      ])
+      bulkBar
     ]);
 
     return page;

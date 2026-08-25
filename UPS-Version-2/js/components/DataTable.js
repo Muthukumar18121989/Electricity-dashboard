@@ -29,17 +29,50 @@
       })
     );
 
+    var sort = options.sort || null;
+
+    function headerContent(column) {
+      if (column.renderHeader) return { node: column.renderHeader(), sortable: false };
+      if (!column.sortable) return { node: null, sortable: false };
+
+      var active = sort && sort.key === column.key ? sort.dir : null;
+      var icon = active === 'desc' ? DA.icons.chevronDown(11) : DA.icons.chevronUp(11);
+
+      return {
+        sortable: true,
+        node: el('button', {
+          className: 'sort-button' + (active ? ' is-sorted' : ''),
+          attrs: {
+            type: 'button',
+            'aria-label': 'Sort by ' + column.label +
+              (active === 'asc' ? ', ascending' : active === 'desc' ? ', descending' : '')
+          },
+          on: { click: function () { if (options.onSort) options.onSort(column.key); } }
+        }, [
+          el('span', { text: column.label }),
+          el('span', { className: 'sort-button__icon', attrs: { 'aria-hidden': 'true' } }, [icon])
+        ])
+      };
+    }
+
     var head = el('thead', {}, [
       el(
         'tr',
         {},
         columns.map(function (column) {
-          var custom = column.renderHeader ? column.renderHeader() : null;
+          var header = headerContent(column);
+          var active = sort && sort.key === column.key ? sort.dir : null;
           return el('th', {
-            text: custom ? null : column.label,
-            attrs: { scope: 'col', 'aria-label': column.ariaLabel || false },
-            className: column.headerClassName || ''
-          }, custom ? [custom] : null);
+            text: header.node ? null : column.label,
+            attrs: {
+              scope: 'col',
+              'aria-label': column.ariaLabel || false,
+              'aria-sort': column.sortable
+                ? (active === 'asc' ? 'ascending' : active === 'desc' ? 'descending' : 'none')
+                : false
+            },
+            className: (column.headerClassName || '') + (header.sortable ? ' is-sortable' : '')
+          }, header.node ? [header.node] : null);
         })
       )
     ]);
@@ -144,7 +177,8 @@
         (options.embedded ? ' data-table--auto' : '') +
         (options.headerTone ? ' data-table--' + options.headerTone : '') +
         (options.dividers ? ' data-table--dividers' : '') +
-        (options.tinted ? ' data-table--tinted' : '')
+        (options.tinted ? ' data-table--tinted' : '') +
+        (options.className ? ' ' + options.className : '')
     }, [
       options.caption
         ? el('caption', { className: 'u-visually-hidden', text: options.caption })

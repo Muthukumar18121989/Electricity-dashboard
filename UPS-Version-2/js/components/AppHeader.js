@@ -21,7 +21,7 @@
     logo.setAttribute('aria-label', 'UPS');
     logo.removeAttribute('aria-hidden');
 
-    return el('header', { className: 'app-header', attrs: { role: 'banner' } }, [
+    var bar = el('header', { className: 'app-header', attrs: { role: 'banner' } }, [
       el('div', { className: 'app-header__brand' }, [
         logo,
         el('div', { className: 'app-header__titles' }, [
@@ -44,6 +44,20 @@
         DA.components.IconButton({ icon: icons.bell(), ariaLabel: 'Notifications' }),
         DA.components.Avatar({ name: user.name, initials: user.initials })
       ])
+    ]);
+
+    if (!options.journey) return bar;
+
+    // The journey strip is a second, shorter bar directly beneath the brand
+    // bar — it needs its own row so both stay legible at narrow widths.
+    return el('div', { className: 'app-header-group' }, [
+      bar,
+      DA.components.StepIndicator({
+        ariaLabel: 'New analyzer packet progress',
+        steps: options.journey.steps,
+        current: options.journey.current,
+        onSelect: options.journey.onSelect
+      })
     ]);
   };
 })(window.DA);

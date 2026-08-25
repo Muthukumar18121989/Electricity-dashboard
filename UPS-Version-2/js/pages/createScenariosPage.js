@@ -23,6 +23,10 @@
 
     var summary = C.SummaryPanel({
       ariaLabel: 'Analyzer packet summary',
+      // The scenarios below are the reason this screen exists; the packet's
+      // own record details are reference material, so they start folded and
+      // stay one click away rather than competing with the primary task.
+      expanded: false,
       headline: [
         { label: 'Analyzer Packet ID', value: packet.packetId },
         { label: 'Customer Name', value: packet.customerName },
@@ -141,8 +145,18 @@
 
     /* ---- Composition ------------------------------------------------------ */
 
+    // Arriving from "Source Data", the packet is ready immediately — sourcing
+    // is a real step, so it stays visible as an inline, non-blocking status
+    // rather than a modal the user must dismiss before the screen is usable.
+    var sourcingBanner = options.showSourcingDialog
+      ? el('div', { className: 'sourcing-banner' }, [
+          C.Alert({ tone: 'info', message: 'Sourcing data for this packet — this only takes a moment.' })
+        ])
+      : null;
+
     var panel = el('section', { className: 'panel panel--auto' }, [
       el('div', { className: 'panel__content' }, [
+        sourcingBanner,
         summary,
         C.Alert({ message: 'Active Bids sourced for existing customers' }),
         scenarioList,
@@ -173,16 +187,11 @@
       actions
     ]);
 
-    if (options.showSourcingDialog) {
+    if (sourcingBanner) {
       window.setTimeout(function () {
-        C.Modal({
-          accent: true,
-          title: 'Sourcing Data is in progress',
-          body:
-            'Sourcing Data is in progress. The links will be enabled after the ' +
-            'process is complete. Thank you for your patience.'
-        }).open();
-      }, 0);
+        if (sourcingBanner.parentNode) sourcingBanner.parentNode.removeChild(sourcingBanner);
+        DA.toast.show('Data sourced. Scenario 0 is ready to review.', { tone: 'success' });
+      }, 1100);
     }
 
     return page;
