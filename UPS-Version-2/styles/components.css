@@ -434,6 +434,21 @@
   white-space: nowrap;
 }
 
+/*
+ * Every table in the product is embedded (sized to its rows; the page
+ * scrolls past it, the table never scrolls vertically on its own) — so a
+ * sticky thead has no box of its own to stick within. It was latching onto
+ * whichever ancestor actually scrolls instead, which put it in direct
+ * competition with the page-level sticky filters/tabs bar: as a table
+ * scrolled by, a stray header — or, past it, a stray row — would surface
+ * in the gap above that bar. Embedded theads go back to sitting in normal
+ * flow; `.data-table--sticky-cols` still pins its lane columns (a
+ * horizontal, not vertical, stick) independently of this.
+ */
+.data-table--auto thead th {
+  position: static;
+}
+
 .data-table thead th:first-child {
   border-top-left-radius: 0;
 }
@@ -3124,13 +3139,21 @@ button.step-indicator__button:hover {
    -------------------------------------------------------------------------- */
 .sticky-subheader {
   position: sticky;
-  top: 0;
+  /*
+   * `.page` has its own top padding, so a plain `top: 0` sticks this to
+   * the padding *edge* — page-gutter's worth of scrolled content stayed
+   * uncovered above it, in the padding strip .page's own overflow:auto
+   * doesn't clip (padding is inside the scrollport). Pulling the sticky
+   * offset up by that same amount, and folding it into this element's own
+   * top margin/padding instead, closes that gap completely.
+   */
+  top: calc(var(--page-gutter) * -1);
   z-index: 10;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-1) var(--page-gutter) var(--space-4);
-  margin: 0 calc(var(--page-gutter) * -1);
+  padding: var(--page-gutter) var(--page-gutter) var(--space-4);
+  margin: calc(var(--page-gutter) * -1) calc(var(--page-gutter) * -1) 0;
   background-color: var(--color-bg);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
@@ -3216,16 +3239,23 @@ button.step-indicator__button:hover {
    -------------------------------------------------------------------------- */
 .bulk-bar {
   position: sticky;
-  bottom: 0;
+  /*
+   * Same gap as the sticky sub-header, at the opposite edge: `.page` has
+   * its own bottom padding, so `bottom: 0` left that padding strip
+   * uncovered — scrolled rows stayed visible beneath this bar instead of
+   * disappearing behind it. Sticking flush to .page's true bottom and
+   * folding the padding into this element's own box closes the gap.
+   */
+  bottom: calc(var(--page-gutter) * -1);
   z-index: 15;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5) calc(var(--space-4) + var(--page-gutter));
+  margin: var(--space-4) 0 calc(var(--page-gutter) * -1);
   background-color: var(--color-surface-inverse);
-  border-radius: var(--radius-container);
+  border-radius: var(--radius-container) var(--radius-container) 0 0;
   box-shadow: var(--shadow-lg);
   color: var(--color-text-inverse);
   transform: translateY(8px);
